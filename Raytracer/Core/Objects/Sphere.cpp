@@ -4,6 +4,35 @@
 
 Sphere::Sphere(glm::vec3 pos, float rad) : Object(pos), radius(rad) {}
 
+bool Sphere::intersect(const Ray & ray, float & parameter)
+{
+	//Find the distance squared between the ray origin and center
+	glm::vec3 rayOriginToSphereCenter = this->position - ray.getOrigin();
+	float distanceSquared = glm::dot(rayOriginToSphereCenter, rayOriginToSphereCenter);
+	bool outsideSphere = distanceSquared >= this->radius*this->radius;
+
+	float closestApproachParameter = glm::dot(rayOriginToSphereCenter, ray.getDirectionVector());
+	if (outsideSphere && closestApproachParameter < 0)
+	{
+		return false;
+	}
+
+	float halfChordDistanceSquared = this->radius*this->radius - distanceSquared + closestApproachParameter * closestApproachParameter;
+	if (outsideSphere && halfChordDistanceSquared < 0)
+	{
+		return false;
+	}
+
+	if (outsideSphere)
+	{
+		parameter = closestApproachParameter - sqrt(halfChordDistanceSquared);
+	}
+	else
+	{
+		parameter = closestApproachParameter + sqrt(halfChordDistanceSquared);
+	}
+}
+
 IntersectionResult Sphere::intersect(Ray ray)
 {
 	IntersectionResult intersectionResult = {};

@@ -9,6 +9,19 @@
 const int WIDTH = 1920;
 const int HEIGHT = 1080;
 
+#include <limits>
+const float infinity = std::numeric_limits<float>::max();
+
+bool trace(const Ray & ray, std::vector<Object*> & objectList, float &nearestHitParameter, Object &objectHit)
+{
+	nearestHitParameter = infinity;
+	for (Object * object : objectList)
+	{
+		float rayParameter = infinity;
+		if(object->intersect(ray, rayParameter))
+	}
+}
+
 int main()
 {
 	Ray ray = Ray(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));

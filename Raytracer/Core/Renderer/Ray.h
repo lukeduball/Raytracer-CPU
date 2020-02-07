@@ -14,8 +14,8 @@ class Ray
 public:
 	Ray(glm::vec3 o, glm::vec3 d);
 
-	glm::vec3 getOrigin();
-	glm::vec3 getDirectionVector();
+	glm::vec3 getOrigin() const;
+	glm::vec3 getDirectionVector() const;
 
 private:
 	glm::vec3 origin;
