@@ -2,6 +2,7 @@
 #include <vector>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <algorithm>
 
 #include "../Objects/Sphere.h"
 #include "../Renderer/Ray.h"
@@ -15,7 +16,7 @@ const uint32_t HEIGHT = 600;
 #include <limits>
 const float infinity = std::numeric_limits<float>::max();
 
-bool trace(const Ray & ray, std::vector<Object*> & objectList, float &nearestHitParameter, Object *objectHit)
+bool trace(const Ray & ray, std::vector<Object*> & objectList, float &nearestHitParameter, Object *& objectHit)
 {
 	nearestHitParameter = infinity;
 	for (Object * object : objectList)
@@ -43,7 +44,12 @@ glm::vec3 getColorFromRaycast(const Ray & ray, std::vector<Object*> & objectList
 	if (trace(ray, objectList, nearestHitParameter, nearestHit))
 	{
 		glm::vec3 intersectionPoint = ray.getOrigin() + (ray.getDirectionVector() * nearestHitParameter);
-		hitColor = glm::vec3(1.0f, 0.0f, 0.0f);
+		glm::vec3 normal = nearestHit->getNormalData(intersectionPoint);
+		glm::vec2 texCoords = nearestHit->getTextureCoordData(intersectionPoint, normal);
+
+		float scale = 4;
+		float pattern = (fmodf(texCoords.x * scale, 1) > 0.5) ^ (fmodf(texCoords.y * scale, 1) > 0.5);
+		hitColor = std::max(0.0f, glm::dot(normal, -ray.getDirectionVector())) * MathFunctions::mix(nearestHit->getColor(), nearestHit->getColor() * 0.8f, pattern);
 	}
 
 	return hitColor;
@@ -79,7 +85,8 @@ int main()
 	Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), 90, 0, 90, (float)WIDTH / (float)HEIGHT);
 
 	std::vector<Object*> objectList;
-	objectList.push_back(new Sphere(glm::vec3(0.0f, 0.0f, -1.0f), 1.0f));
+	objectList.push_back(new Sphere(glm::vec3(0.0f, 0.0f, -3.5f), 1.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+	objectList.push_back(new Sphere(glm::vec3(0.5f, 0.5f, -2.0f), 0.5f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	std::vector<glm::vec3> framebuffer(WIDTH*HEIGHT);
 
 	render(camera, objectList, framebuffer);
