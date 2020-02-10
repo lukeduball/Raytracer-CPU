@@ -2,6 +2,8 @@
 
 #include <glm/vec3.hpp>
 
+class Ray;
+
 class Object
 {
 public:
