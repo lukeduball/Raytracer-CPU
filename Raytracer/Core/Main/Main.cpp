@@ -47,9 +47,7 @@ glm::vec3 getColorFromRaycast(const Ray & ray, std::vector<Object*> & objectList
 		glm::vec3 normal = nearestHit->getNormalData(intersectionPoint);
 		glm::vec2 texCoords = nearestHit->getTextureCoordData(intersectionPoint, normal);
 
-		float scale = 4;
-		float pattern = (fmodf(texCoords.x * scale, 1) > 0.5) ^ (fmodf(texCoords.y * scale, 1) > 0.5);
-		hitColor = std::max(0.0f, glm::dot(normal, -ray.getDirectionVector())) * MathFunctions::mix(nearestHit->getColor(), nearestHit->getColor() * 0.8f, pattern);
+		hitColor = std::max(0.0f, glm::dot(normal, -ray.getDirectionVector())) * nearestHit->getColor();
 	}
 
 	return hitColor;

@@ -131,6 +131,9 @@
     <ClCompile Include="Core\Objects\Sphere.cpp" />
     <ClCompile Include="Core\Renderer\Camera.cpp" />
     <ClCompile Include="Core\Renderer\Image.cpp" />
+    <ClCompile Include="Core\Renderer\Lights\DirectionalLight.cpp" />
+    <ClCompile Include="Core\Renderer\Lights\Light.cpp" />
+    <ClCompile Include="Core\Renderer\Lights\PointLight.cpp" />
     <ClCompile Include="Core\Renderer\Ray.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -139,6 +142,9 @@
     <ClInclude Include="Core\Objects\Sphere.h" />
     <ClInclude Include="Core\Renderer\Camera.h" />
     <ClInclude Include="Core\Renderer\Image.h" />
+    <ClInclude Include="Core\Renderer\Lights\DirectionalLight.h" />
+    <ClInclude Include="Core\Renderer\Lights\Light.h" />
+    <ClInclude Include="Core\Renderer\Lights\PointLight.h" />
     <ClInclude Include="Core\Renderer\Ray.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
