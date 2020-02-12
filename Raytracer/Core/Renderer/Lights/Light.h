@@ -10,7 +10,7 @@ public:
 	float getIntensity();
 	glm::vec3 getColor();
 
-private:
+protected:
 	glm::vec3 color;
 	float intensity;
 };
