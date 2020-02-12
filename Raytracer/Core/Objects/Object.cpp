@@ -1,8 +1,8 @@
 #include "Object.h"
 
-glm::vec3 Object::getColor()
+glm::vec3 Object::getAlbedo()
 {
-	return color;
+	return albedo;
 }
 
 Object::Object(glm::vec3 pos) : position(pos) {}

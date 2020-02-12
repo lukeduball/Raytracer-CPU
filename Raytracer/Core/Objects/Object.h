@@ -13,12 +13,12 @@ public:
 	virtual glm::vec3 getNormalData(glm::vec3 &intersectionPoint) = 0;
 	virtual glm::vec2 getTextureCoordData(glm::vec3 &intersectionPoint, glm::vec3 &normal) = 0;
 
-	glm::vec3 getColor();
+	glm::vec3 getAlbedo();
 
 protected:
 	Object(glm::vec3 pos);
 	glm::vec3 position;
-	glm::vec3 color;
+	glm::vec3 albedo;
 
 private:
 };

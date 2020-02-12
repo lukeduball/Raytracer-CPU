@@ -7,7 +7,7 @@
 
 Sphere::Sphere(glm::vec3 pos, float rad, glm::vec3 color) : Object(pos), radius(rad) 
 {
-	this->color = color;
+	this->albedo = color;
 }
 
 glm::vec3 Sphere::getNormalData(glm::vec3 & intersectionPoint)
@@ -18,8 +18,8 @@ glm::vec3 Sphere::getNormalData(glm::vec3 & intersectionPoint)
 glm::vec2 Sphere::getTextureCoordData(glm::vec3 & intersectionPoint, glm::vec3 & normal)
 {
 	glm::vec2 texCoords;
-	texCoords.x = (1 + atan2(normal.z, normal.x) / M_PI) * 0.5;
-	texCoords.y = acosf(normal.y) / M_PI;
+	texCoords.x = (1 + atan2(normal.z, normal.x) / (float)M_PI) * 0.5f;
+	texCoords.y = acosf(normal.y) / (float)M_PI;
 	return texCoords;
 }
 
