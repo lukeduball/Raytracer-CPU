@@ -1,13 +1,15 @@
 #pragma once
 
 #include <glm/vec3.hpp>
+#include <limits>
 
 #define ARE_FLOATS_EQUAL(f1, f2) MathFunctions::areFloatsEqual(f1, f2)
 
 class MathFunctions
 {
 public:
-	static float EPSILON;
+	static const float EPSILON;
+	static const float T_INFINITY;
 
 	static float degreesToRadians(float degrees);
 	static float clamp(float min, float max, float value);

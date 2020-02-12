@@ -18,15 +18,12 @@
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
-#include <limits>
-const float infinity = std::numeric_limits<float>::max();
-
 bool trace(const Ray & ray, std::vector<Object*> & objectList, float &nearestHitParameter, Object *& objectHit, float upperBound)
 {
-	nearestHitParameter = infinity;
+	nearestHitParameter = MathFunctions::T_INFINITY;
 	for (Object * object : objectList)
 	{
-		float rayParameter = infinity;
+		float rayParameter = MathFunctions::T_INFINITY;
 		//Checks to see if the ray and object intersect and if this hit is the closest hit
 		if (object->intersect(ray, rayParameter) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < nearestHitParameter && rayParameter < upperBound)
 		{
@@ -47,7 +44,7 @@ glm::vec3 getColorFromRaycast(const Ray & ray, std::vector<Object*> & objectList
 	float nearestHitParameter;
 	Object* nearestHit = nullptr;
 
-	if (trace(ray, objectList, nearestHitParameter, nearestHit, infinity))
+	if (trace(ray, objectList, nearestHitParameter, nearestHit, MathFunctions::T_INFINITY))
 	{
 		glm::vec3 intersectionPoint = ray.getOrigin() + (ray.getDirectionVector() * nearestHitParameter);
 		glm::vec3 normal = nearestHit->getNormalData(intersectionPoint);
