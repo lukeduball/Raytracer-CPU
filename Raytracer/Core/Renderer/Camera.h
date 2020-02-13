@@ -14,7 +14,6 @@ public:
 	glm::vec3 convertCameraSpaceToWorldSpace(glm::vec3 cameraPoint);
 
 	void calculateCameraToWorldSpaceMatrix();
-	glm::mat4 getStoredCameraSpaceToWorldSpace();
 	glm::mat4 getViewMatrix();
 	glm::mat4 getProjectionMatrix();
 	glm::vec3 getFrontVector();

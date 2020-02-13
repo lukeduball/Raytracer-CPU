@@ -17,17 +17,12 @@ glm::vec3 Camera::getOrigin()
 
 glm::vec3 Camera::convertCameraSpaceToWorldSpace(const glm::vec3 cameraPoint)
 {
-	return getStoredCameraSpaceToWorldSpace() * glm::vec4(cameraPoint, 1.0f);
+	return this->cameraToWorldSpaceMatrix * glm::vec4(cameraPoint, 1.0f);
 }
 
 void Camera::calculateCameraToWorldSpaceMatrix()
 {
 	this->cameraToWorldSpaceMatrix = glm::inverse(getViewMatrix() * getProjectionMatrix());
-}
-
-glm::mat4 Camera::getStoredCameraSpaceToWorldSpace()
-{
-	return cameraToWorldSpaceMatrix;
 }
 
 glm::mat4 Camera::getViewMatrix()
