@@ -32,7 +32,7 @@ void cleanup(std::vector<Object*> & objectList, std::vector<Light*> & lightList)
 
 int main()
 {
-	Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), 90, 0, 45, (float)WIDTH / (float)HEIGHT);
+	Camera camera(glm::vec3(0.0f, 0.0f, 0.0f), 0, 0, 45, (float)WIDTH / (float)HEIGHT);
 
 	std::vector<Light*> lightList;
 	lightList.push_back(new PointLight(glm::vec3(2, 2, -5), glm::vec3(1.0f, 1.0f, 1.0f), 50));
@@ -42,7 +42,7 @@ int main()
 
 	std::vector<Object*> objectList;
 	objectList.push_back(new Sphere(glm::vec3(0.0f, 0.0f, -7.0f), 1.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
-	objectList.push_back(new Sphere(glm::vec3(1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
+	objectList.push_back(new Sphere(glm::vec3(1.0f, 1.0f, -6.0f), 0.35f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	objectList.push_back(new Sphere(glm::vec3(-1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	objectList.push_back(new Sphere(glm::vec3(1.0f, -1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	objectList.push_back(new Sphere(glm::vec3(-1.0f, -1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));

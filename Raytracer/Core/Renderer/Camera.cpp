@@ -2,7 +2,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-Camera::Camera(float aspect) : Camera(glm::vec3(0.0f, 0.0f, 0.0f), 90.0f, 0.0f, 90.0f, aspect)
+Camera::Camera(float aspect) : Camera(glm::vec3(0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 90.0f, aspect)
 {
 }
 
@@ -38,9 +38,9 @@ glm::mat4 Camera::getProjectionMatrix()
 glm::vec3 Camera::getFrontVector()
 {
 	glm::vec3 front;
-	front.x = cosf(glm::radians(yaw)) * cosf(glm::radians(pitch));
+	front.x = sinf(glm::radians(yaw)) * cosf(glm::radians(pitch));
 	front.y = sinf(glm::radians(pitch));
-	front.z = sinf(glm::radians(yaw)) * cosf(glm::radians(pitch));
+	front.z = cosf(glm::radians(yaw)) * cosf(glm::radians(pitch));
 	return glm::normalize(front);
 }
 
