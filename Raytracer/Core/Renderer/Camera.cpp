@@ -17,12 +17,17 @@ glm::vec3 Camera::getOrigin()
 
 glm::vec3 Camera::convertCameraSpaceToWorldSpace(const glm::vec3 cameraPoint)
 {
-	return getCameraSpaceToWorldSpace() * glm::vec4(cameraPoint, 1.0f);
+	return getStoredCameraSpaceToWorldSpace() * glm::vec4(cameraPoint, 1.0f);
 }
 
-glm::mat4 Camera::getCameraSpaceToWorldSpace()
+void Camera::calculateCameraToWorldSpaceMatrix()
 {
-	return glm::inverse(getViewMatrix() * getProjectionMatrix());
+	this->cameraToWorldSpaceMatrix = glm::inverse(getViewMatrix() * getProjectionMatrix());
+}
+
+glm::mat4 Camera::getStoredCameraSpaceToWorldSpace()
+{
+	return cameraToWorldSpaceMatrix;
 }
 
 glm::mat4 Camera::getViewMatrix()
@@ -42,4 +47,9 @@ glm::vec3 Camera::getFrontVector()
 	front.y = sinf(glm::radians(pitch));
 	front.z = sinf(glm::radians(yaw)) * cosf(glm::radians(pitch));
 	return glm::normalize(front);
+}
+
+float Camera::getFieldOfView()
+{
+	return fov;
 }

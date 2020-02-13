@@ -13,12 +13,16 @@ public:
 
 	glm::vec3 convertCameraSpaceToWorldSpace(glm::vec3 cameraPoint);
 
-	glm::mat4 getCameraSpaceToWorldSpace();
+	void calculateCameraToWorldSpaceMatrix();
+	glm::mat4 getStoredCameraSpaceToWorldSpace();
 	glm::mat4 getViewMatrix();
 	glm::mat4 getProjectionMatrix();
 	glm::vec3 getFrontVector();
 
+	float getFieldOfView();
+
 private:
+	glm::mat4 cameraToWorldSpaceMatrix;
 	glm::vec3 origin;
 	float yaw;
 	float pitch;

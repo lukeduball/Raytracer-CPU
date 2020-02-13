@@ -12,8 +12,8 @@ public:
 	glm::vec2 getTextureCoordData(glm::vec3 &intersectionPoint, glm::vec3 &normal);
 
 	bool intersect(const Ray & ray, float & parameter);
-	IntersectionResult intersect(Ray ray);
 
 private:
 	float radius;
+	float radiusSquared;
 };

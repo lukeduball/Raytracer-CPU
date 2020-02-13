@@ -5,7 +5,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-const float MathFunctions::EPSILON = 0.00001;
+const float MathFunctions::EPSILON = 0.0001;
 const float MathFunctions::T_INFINITY = std::numeric_limits<float>::max();
 
 float MathFunctions::degreesToRadians(float degrees)
