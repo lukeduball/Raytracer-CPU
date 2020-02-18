@@ -10,6 +10,7 @@
 #include "../Renderer/Lights/DirectionalLight.h"
 #include "../Renderer/Lights/PointLight.h"
 #include "../Renderer/Renderer.h"
+#include "../Objects/Triangle.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -36,12 +37,11 @@ int main()
 
 	std::vector<Light*> lightList;
 	lightList.push_back(new PointLight(glm::vec3(2, 2, -5), glm::vec3(1.0f, 1.0f, 1.0f), 50));
-	lightList.push_back(new PointLight(glm::vec3(-2, 2, -5), glm::vec3(1.0f, 1.0f, 1.0f), 50));
-	lightList.push_back(new PointLight(glm::vec3(2, -2, -5), glm::vec3(1.0f, 1.0f, 1.0f), 50));
-	lightList.push_back(new PointLight(glm::vec3(-2, -2, -5), glm::vec3(1.0f, 1.0f, 1.0f), 50));
+	lightList.push_back(new DirectionalLight(glm::vec3(1, -1, -1), glm::vec3(1, 1, 1), 2));
 
 	std::vector<Object*> objectList;
-	objectList.push_back(new Sphere(glm::vec3(0.0f, 0.0f, -7.0f), 1.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+	//objectList.push_back(new Sphere(glm::vec3(0.0f, 0.0f, -7.0f), 1.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
+	objectList.push_back(new Triangle(glm::vec3(-0.5f, -0.5f, -7.0f), glm::vec3(0.5f, -0.5f, -7.0f), glm::vec3(0.0f, 0.5f, -7.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 	objectList.push_back(new Sphere(glm::vec3(1.0f, 1.0f, -6.0f), 0.35f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	objectList.push_back(new Sphere(glm::vec3(-1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	objectList.push_back(new Sphere(glm::vec3(1.0f, -1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));

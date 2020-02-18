@@ -136,6 +136,7 @@
     <ClCompile Include="Core\Renderer\Lights\PointLight.cpp" />
     <ClCompile Include="Core\Renderer\Ray.cpp" />
     <ClCompile Include="Core\Renderer\Renderer.cpp" />
+    <ClCompile Include="Core\Objects\Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Math\MathFunctions.h" />
@@ -148,6 +149,7 @@
     <ClInclude Include="Core\Renderer\Lights\PointLight.h" />
     <ClInclude Include="Core\Renderer\Ray.h" />
     <ClInclude Include="Core\Renderer\Renderer.h" />
+    <ClInclude Include="Core\Objects\Triangle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
