@@ -25,7 +25,7 @@ void Renderer::render(Camera & camera, std::vector<Object*>& objectList, std::ve
 	{
 		for (uint32_t x = 0; x < width; x++)
 		{
-			float pX = (2.0f * (x + 0.5f) / (float)width - 1.0f)  * scale;
+			float pX = (1.0f - 2.0f * (x + 0.5f) / (float)width)  * scale;
 			float pY = (1.0f - 2.0f * (y + 0.5f) / (float)height) * scale;
 			glm::vec3 position = camera.convertCameraSpaceToWorldSpace(glm::vec3(pX, pY, -1));
 			Ray ray = Ray(position, glm::normalize(position - camera.getOrigin()));
@@ -62,6 +62,8 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 
 			float t;
 			Object* shadowHit = nullptr;
+			bool shadowBreak = trace(Ray(intersectionPoint, -lightDirection), objectList, t, shadowHit, tMaximum);
+			trace(Ray(intersectionPoint, -lightDirection), objectList, t, shadowHit, tMaximum);
 			bool inShadow = trace(Ray(intersectionPoint, -lightDirection), objectList, t, shadowHit, tMaximum);
 			if (!inShadow)
 			{

@@ -41,11 +41,11 @@ int main()
 
 	std::vector<Object*> objectList;
 	//objectList.push_back(new Sphere(glm::vec3(0.0f, 0.0f, -7.0f), 1.0f, glm::vec3(1.0f, 0.0f, 0.0f)));
-	objectList.push_back(new Triangle(glm::vec3(-0.5f, -0.5f, -7.0f), glm::vec3(0.5f, -0.5f, -7.0f), glm::vec3(0.0f, 0.5f, -7.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+	objectList.push_back(new Triangle(glm::vec3(-1.5f, -0.5f, -5.0f), glm::vec3(0.5f, -0.5f, -7.0f), glm::vec3(0.0f, 0.5f, -7.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
 	objectList.push_back(new Sphere(glm::vec3(1.0f, 1.0f, -6.0f), 0.35f, glm::vec3(0.0f, 1.0f, 0.0f)));
-	objectList.push_back(new Sphere(glm::vec3(-1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
-	objectList.push_back(new Sphere(glm::vec3(1.0f, -1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
-	objectList.push_back(new Sphere(glm::vec3(-1.0f, -1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
+	//objectList.push_back(new Sphere(glm::vec3(-1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
+	//objectList.push_back(new Sphere(glm::vec3(1.0f, -1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
+	//objectList.push_back(new Sphere(glm::vec3(-1.0f, -1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	
 	Renderer renderer(WIDTH, HEIGHT);
 

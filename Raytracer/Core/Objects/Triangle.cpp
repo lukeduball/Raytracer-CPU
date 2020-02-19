@@ -17,8 +17,8 @@ bool Triangle::intersect(const Ray & ray, float & parameter)
 	glm::vec3 sideV1V2 = this->vertex2 - this->vertex1;
 	glm::vec3 sideV1V3 = this->vertex3 - this->vertex1;
 	//Perform a triple product to calculate the determinant
-	glm::vec3 directionSideCross = glm::cross(ray.getDirectionVector(), sideV1V3);
-	float determinant = glm::dot(sideV1V2, directionSideCross);
+	glm::vec3 directionEdgeV1V3Cross = glm::cross(ray.getDirectionVector(), sideV1V3);
+	float determinant = glm::dot(sideV1V2, directionEdgeV1V3Cross);
 
 	//When the determinant is 0, the ray and the triangle are parallel
 	if (ARE_FLOATS_EQUAL(determinant, 0.0f))
@@ -26,26 +26,35 @@ bool Triangle::intersect(const Ray & ray, float & parameter)
 		return false;
 	}
 
-	float inverseDeterminant = 1 / determinant;
+	float inverseDeterminant = 1.0f / determinant;
 
-	//Gives a normalized coordinate on the triangle, if the coordinate is between 0 and 1 it lies within the triangle
-	glm::vec3 rayParamaterVector = ray.getOrigin() - this->vertex1;
-	float u = glm::dot(rayParamaterVector, directionSideCross) * inverseDeterminant;
+	//Find normalized u coordinate of triangle by performing triple scalar product with Ray Direction Vector, V1V3Edge, and Origin-V1
+	glm::vec3 originV1Vector = ray.getOrigin() - this->vertex1;
+	float u = glm::dot(originV1Vector, directionEdgeV1V3Cross) * inverseDeterminant;
 	if (u < 0 || u > 1)
 	{
 		//The point lies outside the triangle
 		return false;
 	}
 
-	glm::vec3 qvec = glm::cross(rayParamaterVector, sideV1V2);
-	float v = glm::dot(ray.getDirectionVector(), qvec) * inverseDeterminant;
+	//Find normalized v coordiante of the triangle by performing triple scalr product with Origin-V1, V1V2Edge, and Ray Direction Vector
+	glm::vec3 originEdgeV1V2Cross = glm::cross(originV1Vector, sideV1V2);
+	float v = glm::dot(ray.getDirectionVector(), originEdgeV1V2Cross) * inverseDeterminant;
+	//if u+v is greater than 1, the point lies outside of the triangle
 	if (v < 0 || u + v > 1)
 	{
 		//The point lies outside the triangle
 		return false;
 	}
 
-	parameter = glm::dot(sideV1V3, qvec) * inverseDeterminant;
+	//Find the ray to intersection point distance parameter by performing triple product of Origin-V1, EdgeV1V2, and EdgeV1V3
+	parameter = glm::dot(sideV1V3, originEdgeV1V2Cross) * inverseDeterminant;
+
+	//If the paramater value for the ray is less than zero, the intersection is facing the wrong direction
+	if (parameter < 0)
+	{
+		return false;
+	}
 
 	return true;
 }
