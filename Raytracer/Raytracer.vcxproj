@@ -127,6 +127,8 @@
   <ItemGroup>
     <ClCompile Include="Core\Main\Main.cpp" />
     <ClCompile Include="Core\Math\MathFunctions.cpp" />
+    <ClCompile Include="Core\Objects\Models\Mesh.cpp" />
+    <ClCompile Include="Core\Objects\Models\Model.cpp" />
     <ClCompile Include="Core\Objects\Object.cpp" />
     <ClCompile Include="Core\Objects\Sphere.cpp" />
     <ClCompile Include="Core\Renderer\Camera.cpp" />
@@ -140,6 +142,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Math\MathFunctions.h" />
+    <ClInclude Include="Core\Objects\Models\Mesh.h" />
+    <ClInclude Include="Core\Objects\Models\Model.h" />
     <ClInclude Include="Core\Objects\Object.h" />
     <ClInclude Include="Core\Objects\Sphere.h" />
     <ClInclude Include="Core\Renderer\Camera.h" />

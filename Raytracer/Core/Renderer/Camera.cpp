@@ -22,7 +22,7 @@ glm::vec3 Camera::convertCameraSpaceToWorldSpace(const glm::vec3 cameraPoint)
 
 void Camera::calculateCameraToWorldSpaceMatrix()
 {
-	this->cameraToWorldSpaceMatrix = glm::inverse(getViewMatrix() * getProjectionMatrix());
+	this->cameraToWorldSpaceMatrix = glm::inverse(getViewMatrix());
 }
 
 glm::mat4 Camera::getViewMatrix()

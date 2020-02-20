@@ -25,9 +25,9 @@ void Renderer::render(Camera & camera, std::vector<Object*>& objectList, std::ve
 	{
 		for (uint32_t x = 0; x < width; x++)
 		{
-			float pX = (1.0f - 2.0f * (x + 0.5f) / (float)width)  * scale;
+			float pX = (1.0f - 2.0f * (x + 0.5f) / (float)width) * scale * aspectRatio;
 			float pY = (1.0f - 2.0f * (y + 0.5f) / (float)height) * scale;
-			glm::vec3 position = camera.convertCameraSpaceToWorldSpace(glm::vec3(pX, pY, -1));
+			glm::vec3 position = camera.convertCameraSpaceToWorldSpace(glm::vec3(pX, pY, 1));
 			Ray ray = Ray(position, glm::normalize(position - camera.getOrigin()));
 			framebuffer[x + width * y] = getColorFromRaycast(ray, objectList, lightList);
 		}

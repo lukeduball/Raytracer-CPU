@@ -10,12 +10,27 @@ Triangle::Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 color) : 
 	this->albedo = color;
 }
 
-//Implmentation of Moller-Trumbore Algorithm from https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
 bool Triangle::intersect(const Ray & ray, float & parameter)
 {
+	return intersectTriangle(ray, this->vertex1, this->vertex2, this->vertex3, parameter);
+}
+
+glm::vec3 Triangle::getNormalData(glm::vec3 & intersectionPoint)
+{
+	return glm::normalize(glm::cross(this->vertex2 - this->vertex1, this->vertex3 - this->vertex1));
+}
+
+glm::vec2 Triangle::getTextureCoordData(glm::vec3 & intersectionPoint, glm::vec3 & normal)
+{
+	return glm::vec2();
+}
+
+//Implmentation of Moller-Trumbore Algorithm from https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection
+bool Triangle::intersectTriangle(const Ray & ray, const glm::vec3 & vertex1, const glm::vec3 & vertex2, const glm::vec3 & vertex3, float & parameter)
+{
 	//Calculate the vectors for two sides of the triangle
-	glm::vec3 sideV1V2 = this->vertex2 - this->vertex1;
-	glm::vec3 sideV1V3 = this->vertex3 - this->vertex1;
+	glm::vec3 sideV1V2 = vertex2 - vertex1;
+	glm::vec3 sideV1V3 = vertex3 - vertex1;
 	//Perform a triple product to calculate the determinant
 	glm::vec3 directionEdgeV1V3Cross = glm::cross(ray.getDirectionVector(), sideV1V3);
 	float determinant = glm::dot(sideV1V2, directionEdgeV1V3Cross);
@@ -29,7 +44,7 @@ bool Triangle::intersect(const Ray & ray, float & parameter)
 	float inverseDeterminant = 1.0f / determinant;
 
 	//Find normalized u coordinate of triangle by performing triple scalar product with Ray Direction Vector, V1V3Edge, and Origin-V1
-	glm::vec3 originV1Vector = ray.getOrigin() - this->vertex1;
+	glm::vec3 originV1Vector = ray.getOrigin() - vertex1;
 	float u = glm::dot(originV1Vector, directionEdgeV1V3Cross) * inverseDeterminant;
 	if (u < 0 || u > 1)
 	{
@@ -57,14 +72,4 @@ bool Triangle::intersect(const Ray & ray, float & parameter)
 	}
 
 	return true;
-}
-
-glm::vec3 Triangle::getNormalData(glm::vec3 & intersectionPoint)
-{
-	return glm::normalize(glm::cross(this->vertex2 - this->vertex1, this->vertex3 - this->vertex1));
-}
-
-glm::vec2 Triangle::getTextureCoordData(glm::vec3 & intersectionPoint, glm::vec3 & normal)
-{
-	return glm::vec2();
 }
