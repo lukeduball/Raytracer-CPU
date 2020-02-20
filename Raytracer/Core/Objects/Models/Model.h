@@ -8,7 +8,7 @@ class Mesh;
 class Model : public Object
 {
 public:
-	Model(glm::vec3 pos, glm::vec3 color, Mesh * mesh);
+	Model(glm::vec3 pos, float s, glm::vec3 color, Mesh * mesh);
 
 	bool intersect(const Ray & ray, float & parameter);
 
@@ -19,5 +19,7 @@ private:
 	float scale;
 	std::vector<glm::vec3> transformedVertices;
 	Mesh * mesh;
+
+	void transformModelVertices();
 
 };

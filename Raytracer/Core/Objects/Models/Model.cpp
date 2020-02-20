@@ -5,14 +5,18 @@
 #include "../../Math/MathFunctions.h"
 #include "Mesh.h"
 
-Model::Model(glm::vec3 pos, glm::vec3 color, Mesh * m) : Object(pos), mesh(m)
+#include <glm/matrix.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+Model::Model(glm::vec3 pos, float s, glm::vec3 color, Mesh * m) : Object(pos), mesh(m), scale(s)
 {
 	this->albedo = color;
+	this->transformedVertices.resize(mesh->vertices.size());
+	this->transformModelVertices();
 }
 
 bool Model::intersect(const Ray & ray, float & parameter)
 {
-	this->transformedVertices = mesh->vertices;
 	float nearestParameter = MathFunctions::T_INFINITY;
 
 	size_t numTriangles = mesh->indices.size() / 3;
@@ -44,4 +48,15 @@ glm::vec3 Model::getNormalData(glm::vec3 & intersectionPoint)
 glm::vec2 Model::getTextureCoordData(glm::vec3 & intersectionPoint, glm::vec3 & normal)
 {
 	return glm::vec2();
+}
+
+void Model::transformModelVertices()
+{
+	glm::mat4 transformMatrix = glm::mat4(1.0f);
+	transformMatrix = glm::translate(transformMatrix, position);
+	transformMatrix = glm::scale(transformMatrix, glm::vec3(scale));
+	for (uint32_t i = 0; i < mesh->vertices.size(); i++)
+	{
+		this->transformedVertices[i] = transformMatrix * glm::vec4(mesh->vertices[i], 1.0f);
+	}
 }
