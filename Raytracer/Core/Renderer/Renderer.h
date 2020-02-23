@@ -3,8 +3,9 @@
 #include <vector>
 #include <glm/vec3.hpp>
 
+#include "../Objects/Object.h"
+
 class Camera;
-class Object;
 class Light;
 class Ray;
 
@@ -22,5 +23,5 @@ private:
 	uint32_t height;
 
 	glm::vec3 getColorFromRaycast(const Ray & ray, std::vector<Object*> & objectList, std::vector<Light*> & lightList);
-	bool trace(const Ray & ray, std::vector<Object*> & objectList, float &nearestHitParameter, Object *& objectHit, float upperBound);
+	bool trace(const Ray & ray, std::vector<Object*> & objectList, float &nearestHitParameter, Object *& objectHit, float upperBound, IntersectionData & intersectionData);
 };

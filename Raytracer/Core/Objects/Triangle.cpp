@@ -10,19 +10,16 @@ Triangle::Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 color) : 
 	this->albedo = color;
 }
 
-bool Triangle::intersect(const Ray & ray, float & parameter)
+bool Triangle::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
 {
 	return intersectTriangle(ray, this->vertex1, this->vertex2, this->vertex3, parameter);
 }
 
-glm::vec3 Triangle::getNormalData(glm::vec3 & intersectionPoint)
+void Triangle::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords)
 {
-	return glm::normalize(glm::cross(this->vertex2 - this->vertex1, this->vertex3 - this->vertex1));
-}
+	normal = glm::normalize(glm::cross(this->vertex2 - this->vertex1, this->vertex3 - this->vertex1));
 
-glm::vec2 Triangle::getTextureCoordData(glm::vec3 & intersectionPoint, glm::vec3 & normal)
-{
-	return glm::vec2();
+	textureCoords = glm::vec2();
 }
 
 //Implmentation of Moller-Trumbore Algorithm from https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection

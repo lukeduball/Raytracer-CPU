@@ -15,7 +15,7 @@ Model::Model(glm::vec3 pos, float s, glm::vec3 color, Mesh * m) : Object(pos), m
 	this->transformModelVertices();
 }
 
-bool Model::intersect(const Ray & ray, float & parameter)
+bool Model::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
 {
 	float nearestParameter = MathFunctions::T_INFINITY;
 
@@ -35,19 +35,20 @@ bool Model::intersect(const Ray & ray, float & parameter)
 		if (Triangle::intersectTriangle(ray, vertex1, vertex2, vertex3, rayParameter) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < nearestParameter)
 		{
 			parameter = rayParameter;
+			intersectionData.index = j;
 		}
 	}
 	return parameter != MathFunctions::T_INFINITY;
 }
 
-glm::vec3 Model::getNormalData(glm::vec3 & intersectionPoint)
+void Model::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords)
 {
-	return glm::vec3(0.0f, 1.0f, 0.0f);
-}
+	glm::vec3 vertex1 = this->transformedVertices[this->mesh->indices[intersectionData.index]];
+	glm::vec3 vertex2 = this->transformedVertices[this->mesh->indices[intersectionData.index + 1]];
+	glm::vec3 vertex3 = this->transformedVertices[this->mesh->indices[intersectionData.index + 2]];
+	normal = glm::normalize(glm::cross(vertex2 - vertex1, vertex3 - vertex1));
 
-glm::vec2 Model::getTextureCoordData(glm::vec3 & intersectionPoint, glm::vec3 & normal)
-{
-	return glm::vec2();
+	textureCoords = glm::vec2();
 }
 
 void Model::transformModelVertices()

@@ -6,7 +6,6 @@
 
 #include "Camera.h"
 #include "Ray.h"
-#include "../Objects/Object.h"
 #include "Lights/Light.h"
 #include "../Math/MathFunctions.h"
 
@@ -46,12 +45,14 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 
 	float nearestHitParameter;
 	Object* nearestHit = nullptr;
+	IntersectionData intersectionData;
 
-	if (trace(ray, objectList, nearestHitParameter, nearestHit, MathFunctions::T_INFINITY))
+	if (trace(ray, objectList, nearestHitParameter, nearestHit, MathFunctions::T_INFINITY, intersectionData))
 	{
 		glm::vec3 intersectionPoint = ray.getOrigin() + (ray.getDirectionVector() * nearestHitParameter);
-		glm::vec3 normal = nearestHit->getNormalData(intersectionPoint);
-		glm::vec2 texCoords = nearestHit->getTextureCoordData(intersectionPoint, normal);
+		glm::vec3 normal;
+		glm::vec2 textureCoords;
+		nearestHit->getSurfaceData(intersectionPoint, intersectionData, normal, textureCoords);
 
 		for (Light* light : lightList)
 		{
@@ -62,9 +63,8 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 
 			float t;
 			Object* shadowHit = nullptr;
-			bool shadowBreak = trace(Ray(intersectionPoint, -lightDirection), objectList, t, shadowHit, tMaximum);
-			trace(Ray(intersectionPoint, -lightDirection), objectList, t, shadowHit, tMaximum);
-			bool inShadow = trace(Ray(intersectionPoint, -lightDirection), objectList, t, shadowHit, tMaximum);
+			IntersectionData shadowData;
+			bool inShadow = trace(Ray(intersectionPoint, -lightDirection), objectList, t, shadowHit, tMaximum, shadowData);
 			if (!inShadow)
 			{
 				hitColor += nearestHit->getAlbedo() / (float)M_PI * attenuatedLight * std::max(0.0f, glm::dot(normal, -lightDirection));
@@ -75,14 +75,14 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 	return hitColor;
 }
 
-bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & nearestHitParameter, Object *& objectHit, float upperBound)
+bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & nearestHitParameter, Object *& objectHit, float upperBound, IntersectionData & intersectionData)
 {
 	nearestHitParameter = MathFunctions::T_INFINITY;
 	for (Object * object : objectList)
 	{
 		float rayParameter = MathFunctions::T_INFINITY;
 		//Checks to see if the ray and object intersect and if this hit is the closest hit
-		if (object->intersect(ray, rayParameter) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < nearestHitParameter && rayParameter < upperBound)
+		if (object->intersect(ray, rayParameter, intersectionData) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < nearestHitParameter && rayParameter < upperBound)
 		{
 			objectHit = object;
 			nearestHitParameter = rayParameter;

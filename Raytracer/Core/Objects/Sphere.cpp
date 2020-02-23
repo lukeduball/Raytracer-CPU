@@ -10,20 +10,15 @@ Sphere::Sphere(glm::vec3 pos, float rad, glm::vec3 color) : Object(pos), radius(
 	this->albedo = color;
 }
 
-glm::vec3 Sphere::getNormalData(glm::vec3 & intersectionPoint)
+void Sphere::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords)
 {
-	return glm::normalize(intersectionPoint - this->position);
+	normal = glm::normalize(intersectionPoint - this->position);
+
+	textureCoords.x = (1 + atan2(normal.z, normal.x) / (float)M_PI) * 0.5f;
+	textureCoords.y = acosf(normal.y) / (float)M_PI;
 }
 
-glm::vec2 Sphere::getTextureCoordData(glm::vec3 & intersectionPoint, glm::vec3 & normal)
-{
-	glm::vec2 texCoords;
-	texCoords.x = (1 + atan2(normal.z, normal.x) / (float)M_PI) * 0.5f;
-	texCoords.y = acosf(normal.y) / (float)M_PI;
-	return texCoords;
-}
-
-bool Sphere::intersect(const Ray & ray, float & parameter)
+bool Sphere::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
 {
 	//Find the distance squared between the ray origin and center
 	glm::vec3 rayOriginToSphereCenter = this->position - ray.getOrigin();
@@ -50,4 +45,6 @@ bool Sphere::intersect(const Ray & ray, float & parameter)
 	{
 		parameter = closestApproachParameter + sqrt(halfChordDistanceSquared);
 	}
+
+	return true;
 }

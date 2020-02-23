@@ -5,13 +5,17 @@
 
 class Ray;
 
+struct IntersectionData
+{
+	uint32_t index;
+};
+
 class Object
 {
 public:
-	virtual bool intersect(const Ray & ray, float & parameter) = 0;
+	virtual bool intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData) = 0;
 
-	virtual glm::vec3 getNormalData(glm::vec3 &intersectionPoint) = 0;
-	virtual glm::vec2 getTextureCoordData(glm::vec3 &intersectionPoint, glm::vec3 &normal) = 0;
+	virtual void getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords) = 0;
 
 	glm::vec3 getAlbedo();
 
