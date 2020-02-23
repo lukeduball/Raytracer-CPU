@@ -11,7 +11,7 @@ public:
 	Image(std::string filename, uint32_t width, uint32_t height);
 	~Image();
 
-	void writeFramebufferToImage(std::vector<glm::vec3> framebuffer);
+	void writeFramebufferToImage(const std::vector<glm::vec3> & framebuffer);
 
 private:
 	std::ofstream ofs;

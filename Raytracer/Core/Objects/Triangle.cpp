@@ -17,6 +17,7 @@ bool Triangle::intersect(const Ray & ray, float & parameter, IntersectionData & 
 
 void Triangle::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords)
 {
+	//Calculate the normal by taking the cross product of the difference of the vertices
 	normal = glm::normalize(glm::cross(this->vertex2 - this->vertex1, this->vertex3 - this->vertex1));
 
 	textureCoords = glm::vec2();

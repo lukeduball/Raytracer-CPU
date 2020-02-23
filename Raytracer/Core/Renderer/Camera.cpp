@@ -22,11 +22,13 @@ glm::vec3 Camera::convertCameraSpaceToWorldSpace(const glm::vec3 cameraPoint)
 
 void Camera::calculateCameraToWorldSpaceMatrix()
 {
+	//Computes the camera to world space matrix by taking the inverse of the world to camera space view matrix
 	this->cameraToWorldSpaceMatrix = glm::inverse(getViewMatrix());
 }
 
 glm::mat4 Camera::getViewMatrix()
 {
+	//Computes the world to camera space matrix by looking from the cameras origin in the direction of its front facing vector
 	return glm::lookAt(origin, origin + this->getFrontVector(), glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
@@ -37,6 +39,7 @@ glm::mat4 Camera::getProjectionMatrix()
 
 glm::vec3 Camera::getFrontVector()
 {
+	//Calculate the front facing vector using the yaw and pitch of the camera
 	glm::vec3 front;
 	front.x = sinf(glm::radians(yaw)) * cosf(glm::radians(pitch));
 	front.y = sinf(glm::radians(pitch));

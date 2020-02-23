@@ -5,7 +5,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+//Margin of error used to compare float values
 const float MathFunctions::EPSILON = 0.0001;
+//Maximum value a float can be, t-value of a parametric equation of a ray when the ray has no intersection
 const float MathFunctions::T_INFINITY = std::numeric_limits<float>::max();
 
 float MathFunctions::degreesToRadians(float degrees)
@@ -24,6 +26,7 @@ glm::vec3 MathFunctions::mix(glm::vec3 a, glm::vec3 b, float mixVal)
 	return a * (1 - mixVal) + b * mixVal;
 }
 
+//Compares if two floats are equal given a margin of error
 bool MathFunctions::areFloatsEqual(float f1, float f2)
 {
 	return fabsf(f1 - f2) < EPSILON;

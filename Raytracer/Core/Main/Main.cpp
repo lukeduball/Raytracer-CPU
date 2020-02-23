@@ -17,9 +17,11 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+//Width and Height of the image in pixels
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 
+//Deletes all the dynamically allocated memory in the object and light list
 void cleanup(std::vector<Object*> & objectList, std::vector<Light*> & lightList)
 {
 	for (uint32_t i = 0; i < objectList.size(); i++)
@@ -48,6 +50,7 @@ int main()
 							5, 4, 1,
 							5, 1, 2};	
 
+	//Defines the camera to be used in the scene, WIDTH / HEIGHT is the aspect ratio
 	Camera camera(glm::vec3(0.0f, 2.5f, 2.0f), 0, 0, 45, (float)WIDTH / (float)HEIGHT);
 
 	std::vector<Light*> lightList;
@@ -64,6 +67,7 @@ int main()
 	objectList.push_back(new Sphere(glm::vec3(-1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, glm::vec3(0.5f, 0.5f, 0.5f), &halfBoxMesh));
 	
+	//Initializes the raytracer renderer
 	Renderer renderer(WIDTH, HEIGHT);
 
 	std::cout << "Start raytracing scene!" << std::endl;
