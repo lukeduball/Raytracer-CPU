@@ -1,6 +1,7 @@
 #include "Renderer.h"
 
 #include <algorithm>
+#include <iostream>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -23,6 +24,7 @@ void Renderer::render(Camera & camera, std::vector<Object*>& objectList, std::ve
 	//Calculate matrix ahead of raytracing to reduce time redoing the calculation each pixel during rendering
 	camera.calculateCameraToWorldSpaceMatrix();
 	//Loop through all pixels to send a ray from to render the scene
+	int counter = 0;
 	for (uint32_t y = 0; y < height; y++)
 	{
 		for (uint32_t x = 0; x < width; x++)
@@ -36,6 +38,8 @@ void Renderer::render(Camera & camera, std::vector<Object*>& objectList, std::ve
 			Ray ray = Ray(position, glm::normalize(position - camera.getOrigin()));
 			//Populate the color of the framebuffer by casting the ray into the scene and checking for intersections
 			framebuffer[x + width * y] = getColorFromRaycast(ray, objectList, lightList);
+			//std::cout << "Percent Finsihed: " << (counter / (float)(width*height)) << std::endl;
+			counter++;
 		}
 	}
 }

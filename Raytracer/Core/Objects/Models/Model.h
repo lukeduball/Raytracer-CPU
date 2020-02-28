@@ -2,13 +2,15 @@
 
 #include <vector>
 #include "../Object.h"
+#include "Mesh.h"
 
-class Mesh;
+#include <assimp/scene.h> 
 
 class Model : public Object
 {
 public:
 	Model(glm::vec3 pos, float s, glm::vec3 color, Mesh * mesh);
+	Model(glm::vec3 pos, float s, glm::vec3 color, std::string path);
 
 	bool intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData);
 
@@ -17,7 +19,11 @@ public:
 private:
 	float scale;
 	std::vector<glm::vec3> transformedVertices;
+	std::vector<Mesh> meshList;
 	Mesh * mesh;
+
+	void processNode(aiNode * node, const aiScene * scene);
+	Mesh processMesh(aiMesh *mesh, const aiScene * scene);
 
 	void transformModelVertices();
 

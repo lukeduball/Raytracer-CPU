@@ -66,6 +66,7 @@ int main()
 	objectList.push_back(new Sphere(glm::vec3(1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	objectList.push_back(new Sphere(glm::vec3(-1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, glm::vec3(0.5f, 0.5f, 0.5f), &halfBoxMesh));
+	//objectList.push_back(new Model(glm::vec3(0.0f, 2.0f, -7.0f), 2.0f, glm::vec3(1.0f, 0.0f, 0.0f), "Resources/Models/monkey.obj"));
 	
 	//Initializes the raytracer renderer
 	Renderer renderer(WIDTH, HEIGHT);

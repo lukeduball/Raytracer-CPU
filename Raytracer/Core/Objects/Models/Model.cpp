@@ -3,10 +3,14 @@
 #include "../../Renderer/Ray.h"
 #include "../Triangle.h"
 #include "../../Math/MathFunctions.h"
-#include "Mesh.h"
 
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+
+#include <iostream>
 
 Model::Model(glm::vec3 pos, float s, glm::vec3 color, Mesh * m) : Object(pos), mesh(m), scale(s)
 {
@@ -15,6 +19,26 @@ Model::Model(glm::vec3 pos, float s, glm::vec3 color, Mesh * m) : Object(pos), m
 	//Calculates the transformed vertices for this object's scale and position
 	this->transformModelVertices();
 }
+
+Model::Model(glm::vec3 pos, float s, glm::vec3 color, std::string path) : Object(pos), scale(s)
+{
+	this->albedo = color;
+	Assimp::Importer importer;
+	const aiScene *scene = importer.ReadFile(path, aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_FlipWindingOrder);
+
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+	{
+		std::cout << "(ERROR) ASSIMP: " << importer.GetErrorString() << std::endl;
+		return;
+	}
+
+	processNode(scene->mRootNode, scene);
+
+	mesh = &meshList[0];
+	this->transformedVertices.resize(mesh->vertices.size());
+	this->transformModelVertices();
+}
+
 
 bool Model::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
 {
@@ -58,6 +82,55 @@ void Model::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersecti
 	normal = glm::normalize(glm::cross(vertex2 - vertex1, vertex3 - vertex1));
 
 	textureCoords = glm::vec2();
+}
+
+void Model::processNode(aiNode * node, const aiScene * scene)
+{
+	//Create a mesh object for all the meshes in this node
+	for (uint32_t i = 0; i < node->mNumMeshes; i++)
+	{
+		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+		meshList.push_back(processMesh(mesh, scene));
+	}
+
+	//Process the nodes for each of its children
+	for (uint32_t i = 0; i < node->mNumChildren; i++)
+	{
+		processNode(node->mChildren[i], scene);
+	}
+}
+
+Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
+{
+	Mesh result;
+
+	for (uint32_t i = 0; i < mesh->mNumVertices; i++)
+	{
+		glm::vec3 position;
+		position.x = mesh->mVertices[i].x;
+		position.y = mesh->mVertices[i].y;
+		position.z = mesh->mVertices[i].z;
+		result.vertices.push_back(position);
+
+		//Check if the mesh contains texture coordinates
+		if (mesh->mTextureCoords[0])
+		{
+			//Add texture coordinate data here
+		}
+	}
+
+	for (uint32_t i = 0; i < mesh->mNumFaces; i++)
+	{
+		aiFace face = mesh->mFaces[i];
+		for (uint32_t j = 0; j < face.mNumIndices; j++)
+		{
+			result.indices.push_back(face.mIndices[j]);
+		}
+	}
+
+	//Material properties can be loaded here as well
+
+	return result;
 }
 
 void Model::transformModelVertices()
