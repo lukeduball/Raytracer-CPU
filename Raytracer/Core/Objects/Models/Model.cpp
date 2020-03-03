@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-Model::Model(glm::vec3 pos, float s, glm::vec3 color, Mesh * m) : Object(pos), mesh(m), scale(s)
+Model::Model(glm::vec3 pos, float s, glm::vec3 color, Mesh * m) : Object(pos), mesh(m), scale(s), yawRotation(0.0f)
 {
 	this->albedo = color;
 	this->transformedVertices.resize(mesh->vertices.size());
@@ -20,11 +20,11 @@ Model::Model(glm::vec3 pos, float s, glm::vec3 color, Mesh * m) : Object(pos), m
 	this->transformModelVertices();
 }
 
-Model::Model(glm::vec3 pos, float s, glm::vec3 color, std::string path) : Object(pos), scale(s)
+Model::Model(glm::vec3 pos, float s, float yaw, glm::vec3 color, std::string path) : Object(pos), scale(s), yawRotation(yaw)
 {
 	this->albedo = color;
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFile(path, aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_FlipWindingOrder);
+	const aiScene *scene = importer.ReadFile(path, aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -42,8 +42,6 @@ Model::Model(glm::vec3 pos, float s, glm::vec3 color, std::string path) : Object
 
 bool Model::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
 {
-	float nearestParameter = MathFunctions::T_INFINITY;
-
 	//Calculate the number of triangles by taking the indices and dividing by 3
 	size_t numTriangles = mesh->indices.size() / 3;
 	for (uint32_t i = 0; i < numTriangles; i++)
@@ -61,7 +59,7 @@ bool Model::intersect(const Ray & ray, float & parameter, IntersectionData & int
 
 		float rayParameter = MathFunctions::T_INFINITY;
 		//Check the triangle for intersection, do not accept an intersection if the rayParameter is zero because the intersection is with the same face and check it is the nearest intersection
-		if (Triangle::intersectTriangle(ray, vertex1, vertex2, vertex3, rayParameter) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < nearestParameter)
+		if (Triangle::intersectTriangle(ray, vertex1, vertex2, vertex3, rayParameter) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < parameter)
 		{
 			parameter = rayParameter;
 			//Capture the index number of the triangle for use in normal calculation later
@@ -80,6 +78,7 @@ void Model::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersecti
 	glm::vec3 vertex3 = this->transformedVertices[this->mesh->indices[intersectionData.index + 2]];
 	//Calculate the normal by taking the cross product of the difference of the vertices
 	normal = glm::normalize(glm::cross(vertex2 - vertex1, vertex3 - vertex1));
+
 
 	textureCoords = glm::vec2();
 }
@@ -137,6 +136,7 @@ void Model::transformModelVertices()
 {
 	glm::mat4 transformMatrix = glm::mat4(1.0f);
 	transformMatrix = glm::translate(transformMatrix, position);
+	transformMatrix = glm::rotate(transformMatrix, glm::radians(yawRotation), glm::vec3(0, 1, 0));
 	transformMatrix = glm::scale(transformMatrix, glm::vec3(scale));
 	for (uint32_t i = 0; i < mesh->vertices.size(); i++)
 	{

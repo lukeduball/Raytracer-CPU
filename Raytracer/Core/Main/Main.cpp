@@ -54,19 +54,19 @@ int main()
 	Camera camera(glm::vec3(0.0f, 2.5f, 2.0f), 0, 0, 45, (float)WIDTH / (float)HEIGHT);
 
 	std::vector<Light*> lightList;
-	lightList.push_back(new PointLight(glm::vec3(2, 2, -5), glm::vec3(1.0f, 1.0f, 1.0f), 50));
-	lightList.push_back(new DirectionalLight(glm::vec3(1, -1, -1), glm::vec3(1, 1, 1), 2));
+	lightList.push_back(new PointLight(glm::vec3(0.0f, 2.0f, -4.0f), glm::vec3(1.0f, 1.0f, 1.0f), 50));
+	lightList.push_back(new DirectionalLight(glm::vec3(0, 0, -1), glm::vec3(1, 1, 1), 2));
 
 	std::vector<Object*> objectList;
 
-	objectList.push_back(new Sphere(glm::vec3(0.0f, 2.0f, -7.0f), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)));
-	objectList.push_back(new Triangle(glm::vec3(-1.5f, 1.5f, -5.0f), glm::vec3(0.5f, 1.5f, -7.0f), glm::vec3(0.0f, 2.5f, -7.0f), glm::vec3(1.0f, 0.5f, 0.0f)));
-	objectList.push_back(new Sphere(glm::vec3(1.0f, 3.0f, -6.0f), 0.35f, glm::vec3(0.0f, 1.0f, 0.0f)));
-	objectList.push_back(new Sphere(glm::vec3(-1.0f, 3.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
-	objectList.push_back(new Sphere(glm::vec3(1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
-	objectList.push_back(new Sphere(glm::vec3(-1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
+	//objectList.push_back(new Sphere(glm::vec3(0.0f, 2.0f, -7.0f), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)));
+	//objectList.push_back(new Triangle(glm::vec3(-1.5f, 1.5f, -5.0f), glm::vec3(0.5f, 1.5f, -7.0f), glm::vec3(0.0f, 2.5f, -7.0f), glm::vec3(1.0f, 0.5f, 0.0f)));
+	//objectList.push_back(new Sphere(glm::vec3(1.0f, 3.0f, -6.0f), 0.35f, glm::vec3(0.0f, 1.0f, 0.0f)));
+	//objectList.push_back(new Sphere(glm::vec3(-1.0f, 3.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
+	//objectList.push_back(new Sphere(glm::vec3(1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
+	//objectList.push_back(new Sphere(glm::vec3(-1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
 	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, glm::vec3(0.5f, 0.5f, 0.5f), &halfBoxMesh));
-	//objectList.push_back(new Model(glm::vec3(0.0f, 2.0f, -7.0f), 2.0f, glm::vec3(1.0f, 0.0f, 0.0f), "Resources/Models/monkey.obj"));
+	objectList.push_back(new Model(glm::vec3(0.0f, 2.0f, -7.0f), 2.0f, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f), "Resources/Models/monkey.obj"));
 	
 	//Initializes the raytracer renderer
 	Renderer renderer(WIDTH, HEIGHT);
