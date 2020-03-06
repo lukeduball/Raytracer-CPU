@@ -5,9 +5,8 @@
 
 #include <glm/geometric.hpp>
 
-Triangle::Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 color) : Object((v1 + v2 + v3) / 3.0f), vertex1(v1), vertex2(v2), vertex3(v3)
+Triangle::Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, Material * material) : Object((v1 + v2 + v3) / 3.0f, material), vertex1(v1), vertex2(v2), vertex3(v3)
 {
-	this->albedo = color;
 }
 
 bool Triangle::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)

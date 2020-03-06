@@ -3,6 +3,7 @@
 #include "../../Renderer/Ray.h"
 #include "../Triangle.h"
 #include "../../Math/MathFunctions.h"
+#include "../../Renderer/Materials/Material.h"
 
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -12,17 +13,15 @@
 
 #include <iostream>
 
-Model::Model(glm::vec3 pos, float s, glm::vec3 color, Mesh * m) : Object(pos), mesh(m), scale(s), yawRotation(0.0f)
+Model::Model(glm::vec3 pos, float s, Mesh * m, Material * material) : Object(pos, material), mesh(m), scale(s), yawRotation(0.0f)
 {
-	this->albedo = color;
 	this->transformedVertices.resize(mesh->vertices.size());
 	//Calculates the transformed vertices for this object's scale and position
 	this->transformModelVertices();
 }
 
-Model::Model(glm::vec3 pos, float s, float yaw, glm::vec3 color, std::string path) : Object(pos), scale(s), yawRotation(yaw)
+Model::Model(glm::vec3 pos, float s, float yaw, std::string path, Material * material) : Object(pos, material), scale(s), yawRotation(yaw)
 {
-	this->albedo = color;
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFile(path, aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
 

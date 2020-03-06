@@ -4,6 +4,7 @@
 #include <glm/vec2.hpp>
 
 class Ray;
+class Material;
 
 struct IntersectionData
 {
@@ -17,12 +18,12 @@ public:
 
 	virtual void getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords) = 0;
 
-	glm::vec3 getAlbedo();
+	Material & getMaterial();
 
 protected:
-	Object(glm::vec3 pos);
+	Object(glm::vec3 pos, Material* material);
 	glm::vec3 position;
-	glm::vec3 albedo;
+	Material * material;
 
 private:
 };

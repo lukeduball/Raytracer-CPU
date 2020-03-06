@@ -13,6 +13,7 @@
 #include "../Objects/Triangle.h"
 #include "../Objects/Models/Mesh.h"
 #include "../Objects/Models/Model.h"
+#include "../Renderer/Materials/Material.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -55,18 +56,21 @@ int main()
 
 	std::vector<Light*> lightList;
 	lightList.push_back(new PointLight(glm::vec3(0.0f, 2.0f, -4.0f), glm::vec3(1.0f, 1.0f, 1.0f), 50));
-	lightList.push_back(new DirectionalLight(glm::vec3(0, 0, -1), glm::vec3(1, 1, 1), 2));
+	lightList.push_back(new DirectionalLight(glm::vec3(1, -1, -1), glm::vec3(1, 1, 1), 2));
 
 	std::vector<Object*> objectList;
-
-	//objectList.push_back(new Sphere(glm::vec3(0.0f, 2.0f, -7.0f), 1.0f, glm::vec3(1.0f, 1.0f, 1.0f)));
-	//objectList.push_back(new Triangle(glm::vec3(-1.5f, 1.5f, -5.0f), glm::vec3(0.5f, 1.5f, -7.0f), glm::vec3(0.0f, 2.5f, -7.0f), glm::vec3(1.0f, 0.5f, 0.0f)));
-	//objectList.push_back(new Sphere(glm::vec3(1.0f, 3.0f, -6.0f), 0.35f, glm::vec3(0.0f, 1.0f, 0.0f)));
-	//objectList.push_back(new Sphere(glm::vec3(-1.0f, 3.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
-	//objectList.push_back(new Sphere(glm::vec3(1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
-	//objectList.push_back(new Sphere(glm::vec3(-1.0f, 1.0f, -6.0f), 0.25f, glm::vec3(0.0f, 1.0f, 0.0f)));
-	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, glm::vec3(0.5f, 0.5f, 0.5f), &halfBoxMesh));
-	objectList.push_back(new Model(glm::vec3(0.0f, 2.0f, -7.0f), 2.0f, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f), "Resources/Models/monkey.obj"));
+	Material whiteDiffuse = Material(Material::Type::DIFFUSE, glm::vec3(1.0f, 1.0f, 1.0f));
+	Material orangeDiffuse = Material(Material::Type::DIFFUSE, glm::vec3(1.0f, 0.5f, 0.0f));
+	Material greenDiffuse = Material(Material::Type::DIFFUSE, glm::vec3(0.0f, 1.0f, 0.0f));
+	Material reflect = Material(Material::Type::REFLECT, glm::vec3(1.0f, 1.0f, 1.0f));
+	objectList.push_back(new Sphere(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, &whiteDiffuse));
+	//objectList.push_back(new Triangle(glm::vec3(-1.5f, 0.5f, -5.0f), glm::vec3(0.5f, 1.5f, -7.0f), glm::vec3(0.0f, 2.5f, -7.0f), &orangeDiffuse));
+	objectList.push_back(new Sphere(glm::vec3(1.0f, 2.0f, -6.0f), 0.35f,  &greenDiffuse));
+	objectList.push_back(new Sphere(glm::vec3(-1.0f, 2.0f, -6.0f), 0.25f, &greenDiffuse));
+	objectList.push_back(new Sphere(glm::vec3(1.0f, 0.0f, -6.0f), 0.25f,  &greenDiffuse));
+	objectList.push_back(new Sphere(glm::vec3(-1.0f, 0.0f, -6.0f), 0.25f, &greenDiffuse));
+	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, &halfBoxMesh, &reflect));
+	//objectList.push_back(new Model(glm::vec3(0.0f, 2.0f, -7.0f), 2.0f, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f), "Resources/Models/monkey.obj"));
 	
 	//Initializes the raytracer renderer
 	Renderer renderer(WIDTH, HEIGHT);

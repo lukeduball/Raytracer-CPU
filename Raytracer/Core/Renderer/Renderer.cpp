@@ -9,6 +9,9 @@
 #include "Ray.h"
 #include "Lights/Light.h"
 #include "../Math/MathFunctions.h"
+#include "Materials/Material.h"
+
+const int Renderer::MAX_RAY_DEPTH = 3;
 
 Renderer::Renderer(uint32_t w, uint32_t h) : width(w), height(h)
 {
@@ -49,10 +52,14 @@ std::vector<glm::vec3>& Renderer::getFramebuffer()
 	return framebuffer;
 }
 
-glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& objectList, std::vector<Light*>& lightList)
+glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& objectList, std::vector<Light*>& lightList, const uint32_t & depth)
 {
 	//Background color is specified, if there is no hit in the trace, the background color will be provided
-	glm::vec3 hitColor = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 hitColor = glm::vec3(0.0f, 0.0f, 0.1f);
+	
+	//Return the background color if the current ray has cast more reflection rays than the max depth allows
+	if (depth > MAX_RAY_DEPTH)
+		return hitColor;
 
 	//Value used in ray parameterization to calculate the intersection point
 	float nearestHitParameter;
@@ -71,25 +78,36 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 		//Outputs the normal and texture coordinates for the object that was intersected
 		nearestHit->getSurfaceData(intersectionPoint, intersectionData, normal, textureCoords);
 
-		//Loop through each light in the scene
-		for (Light* light : lightList)
+		switch (nearestHit->getMaterial().getMaterialType())
 		{
-			glm::vec3 lightDirection;
-			glm::vec3 attenuatedLight;
-			float tMaximum;
-			//Output the direction of the light and light data to be used in shading. The tMaximum value is used to determine which t-value to throw away when casting a shadow ray
-			light->getLightDirectionAndIntensity(intersectionPoint, lightDirection, attenuatedLight, tMaximum);
-
-			float t;
-			Object* shadowHit = nullptr;
-			IntersectionData shadowData;
-			//Check if the intersection point is in shadow by casting a shadow ray to the light source
-			bool inShadow = trace(Ray(intersectionPoint, -lightDirection), objectList, t, shadowHit, tMaximum, shadowData);
-			if (!inShadow)
+		case Material::Type::DIFFUSE:
+			//Loop through each light in the scene
+			for (Light* light : lightList)
 			{
-				//Contribute shading from the light source
-				hitColor += nearestHit->getAlbedo() / (float)M_PI * attenuatedLight * std::max(0.0f, glm::dot(normal, -lightDirection));
+				glm::vec3 lightDirection;
+				glm::vec3 attenuatedLight;
+				float tMaximum;
+				//Output the direction of the light and light data to be used in shading. The tMaximum value is used to determine which t-value to throw away when casting a shadow ray
+				light->getLightDirectionAndIntensity(intersectionPoint, lightDirection, attenuatedLight, tMaximum);
+
+				float t;
+				Object* shadowHit = nullptr;
+				IntersectionData shadowData;
+				//Check if the intersection point is in shadow by casting a shadow ray to the light source
+				bool inShadow = trace(Ray(intersectionPoint, -lightDirection), objectList, t, shadowHit, tMaximum, shadowData);
+				if (!inShadow)
+				{
+					//Contribute shading from the light source
+					hitColor += nearestHit->getMaterial().getAlbedo() / (float)M_PI * attenuatedLight * std::max(0.0f, glm::dot(normal, -lightDirection));
+				}
 			}
+			break;
+		case Material::Type::REFLECT:
+			glm::vec3 reflectionDir = getReflectionVector(ray.getDirectionVector(), normal);
+			hitColor += 0.8f * getColorFromRaycast(Ray(intersectionPoint, reflectionDir), objectList, lightList, depth + 1);
+			break;
+		case Material::Type::REFLECT_AND_REFRACT:
+			break;
 		}
 	}
 
@@ -111,4 +129,9 @@ bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & 
 	}
 
 	return objectHit != nullptr;
+}
+
+glm::vec3 Renderer::getReflectionVector(const glm::vec3 incidentDirection, const glm::vec3 normal)
+{
+	return incidentDirection - 2 * glm::dot(incidentDirection, normal) * normal;
 }

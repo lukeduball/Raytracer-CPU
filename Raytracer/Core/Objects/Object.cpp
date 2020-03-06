@@ -1,8 +1,8 @@
 #include "Object.h"
 
-glm::vec3 Object::getAlbedo()
+Material & Object::getMaterial()
 {
-	return albedo;
+	return *this->material;
 }
 
-Object::Object(glm::vec3 pos) : position(pos) {}
+Object::Object(glm::vec3 pos, Material* material) : position(pos), material(material) {}

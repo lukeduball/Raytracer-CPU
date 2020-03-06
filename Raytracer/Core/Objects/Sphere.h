@@ -6,7 +6,7 @@
 class Sphere : public Object
 {
 public:
-	Sphere(glm::vec3 pos, float rad, glm::vec3 color);
+	Sphere(glm::vec3 pos, float rad, Material * material);
 
 	void getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords);
 

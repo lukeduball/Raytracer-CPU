@@ -5,7 +5,7 @@
 class Triangle: public Object
 {
 public:
-	Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 color);
+	Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, Material * material);
 
 	bool intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData);
 

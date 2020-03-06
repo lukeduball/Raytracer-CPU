@@ -9,8 +9,8 @@
 class Model : public Object
 {
 public:
-	Model(glm::vec3 pos, float s, glm::vec3 color, Mesh * mesh);
-	Model(glm::vec3 pos, float s, float yaw, glm::vec3 color, std::string path);
+	Model(glm::vec3 pos, float s, Mesh * mesh, Material * material);
+	Model(glm::vec3 pos, float s, float yaw, std::string path, Material * material);
 
 	bool intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData);
 

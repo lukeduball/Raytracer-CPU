@@ -2,12 +2,13 @@
 
 #include <glm/geometric.hpp>
 
+#include "../Renderer/Materials/Material.h"
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-Sphere::Sphere(glm::vec3 pos, float rad, glm::vec3 color) : Object(pos), radius(rad), radiusSquared(rad * rad)
+Sphere::Sphere(glm::vec3 pos, float rad, Material * material) : Object(pos, material), radius(rad), radiusSquared(rad * rad)
 {
-	this->albedo = color;
 }
 
 void Sphere::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords)
