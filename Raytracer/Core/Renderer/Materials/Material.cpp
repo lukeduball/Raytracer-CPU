@@ -1,6 +1,6 @@
 #include "Material.h"
 
-Material::Material(Type type, glm::vec3 color) : type(type), albedo(color)
+Material::Material(Type t, glm::vec3 color) : type(t), albedo(color)
 {
 }
 

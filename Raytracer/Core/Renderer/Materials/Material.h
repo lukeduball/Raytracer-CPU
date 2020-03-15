@@ -7,7 +7,7 @@ class Material
 public:
 	enum class Type { DIFFUSE, REFLECT, REFLECT_AND_REFRACT };
 
-	Material(Type type, glm::vec3 color);
+	Material(Type t, glm::vec3 color);
 
 	Type getMaterialType();
 	glm::vec3 getAlbedo();

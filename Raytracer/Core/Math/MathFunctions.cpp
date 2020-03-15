@@ -6,7 +6,7 @@
 #include <math.h>
 
 //Margin of error used to compare float values
-const float MathFunctions::EPSILON = 0.0001;
+const float MathFunctions::EPSILON = 0.0001f;
 //Maximum value a float can be, t-value of a parametric equation of a ray when the ray has no intersection
 const float MathFunctions::T_INFINITY = std::numeric_limits<float>::max();
 
