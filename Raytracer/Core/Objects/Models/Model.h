@@ -10,7 +10,9 @@ class Model : public Object
 {
 public:
 	Model(glm::vec3 pos, float s, Mesh * mesh, Material * material);
-	Model(glm::vec3 pos, float s, float yaw, std::string path, Material * material);
+	Model(glm::vec3 pos, float s, std::string path, Material * material);
+
+	void setRotation(float pitch, float yaw, float roll);
 
 	bool intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData);
 
@@ -19,6 +21,8 @@ public:
 private:
 	float scale;
 	float yawRotation;
+	float pitchRotation;
+	float rollRotation;
 	std::vector<glm::vec3> transformedVertices;
 	std::vector<Mesh> meshList;
 	Mesh * mesh;

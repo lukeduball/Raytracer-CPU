@@ -3,6 +3,7 @@
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <algorithm>
+#include <chrono>
 
 #include "../Objects/Sphere.h"
 #include "../Renderer/Camera.h"
@@ -13,7 +14,9 @@
 #include "../Objects/Triangle.h"
 #include "../Objects/Models/Mesh.h"
 #include "../Objects/Models/Model.h"
-#include "../Renderer/Materials/Material.h"
+#include "../Renderer/Materials/RefractiveMaterial.h"
+#include "../Renderer/Materials/DiffuseMaterial.h"
+#include "../Renderer/Materials/ReflectMaterial.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -60,28 +63,40 @@ int main()
 	lightList.push_back(new DirectionalLight(glm::vec3(1, -1, -1), glm::vec3(1, 1, 1), 2));
 
 	std::vector<Object*> objectList;
-	Material whiteDiffuse = Material(Material::Type::DIFFUSE, glm::vec3(1.0f, 1.0f, 1.0f));
-	Material orangeDiffuse = Material(Material::Type::DIFFUSE, glm::vec3(1.0f, 0.5f, 0.0f));
-	Material greenDiffuse = Material(Material::Type::DIFFUSE, glm::vec3(0.0f, 1.0f, 0.0f));
-	Material reflect = Material(Material::Type::REFLECT, glm::vec3(1.0f, 1.0f, 1.0f));
-	Material water = Material(Material::Type::REFLECT_AND_REFRACT, glm::vec3(1.0f, 1.0f, 1.0f));
+	DiffuseMaterial whiteDiffuse = DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f));
+	DiffuseMaterial orangeDiffuse = DiffuseMaterial(glm::vec3(1.0f, 0.5f, 0.0f));
+	DiffuseMaterial greenDiffuse = DiffuseMaterial(glm::vec3(0.0f, 1.0f, 0.0f));
+	ReflectMaterial reflect = ReflectMaterial();
+	RefractiveMaterial water = RefractiveMaterial(1.3f);
 	//objectList.push_back(new Sphere(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, &water));
 	//objectList.push_back(new Triangle(glm::vec3(-1.5f, 0.5f, -5.0f), glm::vec3(0.5f, 1.5f, -7.0f), glm::vec3(0.0f, 2.5f, -7.0f), &orangeDiffuse));
 	//objectList.push_back(new Sphere(glm::vec3(1.0f, 1.0f, -6.0f), 0.35f,  &greenDiffuse));
 	//objectList.push_back(new Sphere(glm::vec3(0.0f, 1.0f, -9.0f), 1.0f, &whiteDiffuse));
 	//objectList.push_back(new Sphere(glm::vec3(1.0f, 0.0f, -6.0f), 0.25f,  &greenDiffuse));
-	//objectList.push_back(new Sphere(glm::vec3(-1.0f, 0.0f, -6.0f), 0.25f, &greenDiffuse));
-	objectList.push_back(new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, 0.0f, "Resources/Models/straw.obj", &greenDiffuse));
-	objectList.push_back(new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, 0.0f, "Resources/Models/cylinder.obj", &water));
-	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, &halfBoxMesh, &whiteDiffuse));
+	objectList.push_back(new Sphere(glm::vec3(-1.5f, 2.0f, -6.0f), 0.25f, &orangeDiffuse));
+	Model * strawModel = new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, "Resources/Models/straw.obj", &greenDiffuse);
+	strawModel->setRotation(0.0f, 0.0f, -45.0f);
+	objectList.push_back(strawModel);
+	objectList.push_back(new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, "Resources/Models/cylinder.obj", &water));
+	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, &halfBoxMesh, &reflect));
 	//objectList.push_back(new Model(glm::vec3(0.0f, 2.0f, -7.0f), 2.0f, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f), "Resources/Models/monkey.obj"));
 	
 	//Initializes the raytracer renderer
 	Renderer renderer(WIDTH, HEIGHT);
 
 	std::cout << "Start raytracing scene!" << std::endl;
+	//Stores the clock time at the start of the rendering process
+	auto startTime = std::chrono::high_resolution_clock::now();
+
 	renderer.render(camera, objectList, lightList);
+
 	std::cout << "Raytracing finished!" << std::endl;
+	//Stores the clock time at the end of the rendering process
+	auto endTime = std::chrono::high_resolution_clock::now();
+	//Calculates the elapsed time in milliseconds that the rendering process took by subtracting the start time from the end time
+	auto elapsedTime = std::chrono::duration<double, std::milli>(endTime - startTime).count();
+	//Prints out the elapsed time in seconds to 2 decimal places
+	printf("Completed Rendering in: %.2f sec\n", elapsedTime / 1000.0f);
 
 	std::cout << "Writing Image!" << std::endl;
 	Image image("./out.ppm", WIDTH, HEIGHT);

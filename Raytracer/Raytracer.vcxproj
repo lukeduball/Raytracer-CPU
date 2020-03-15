@@ -140,7 +140,10 @@
     <ClCompile Include="Core\Renderer\Lights\DirectionalLight.cpp" />
     <ClCompile Include="Core\Renderer\Lights\Light.cpp" />
     <ClCompile Include="Core\Renderer\Lights\PointLight.cpp" />
+    <ClCompile Include="Core\Renderer\Materials\DiffuseMaterial.cpp" />
     <ClCompile Include="Core\Renderer\Materials\Material.cpp" />
+    <ClCompile Include="Core\Renderer\Materials\ReflectMaterial.cpp" />
+    <ClCompile Include="Core\Renderer\Materials\RefractiveMaterial.cpp" />
     <ClCompile Include="Core\Renderer\Ray.cpp" />
     <ClCompile Include="Core\Renderer\Renderer.cpp" />
     <ClCompile Include="Core\Objects\Triangle.cpp" />
@@ -156,7 +159,10 @@
     <ClInclude Include="Core\Renderer\Lights\DirectionalLight.h" />
     <ClInclude Include="Core\Renderer\Lights\Light.h" />
     <ClInclude Include="Core\Renderer\Lights\PointLight.h" />
+    <ClInclude Include="Core\Renderer\Materials\DiffuseMaterial.h" />
     <ClInclude Include="Core\Renderer\Materials\Material.h" />
+    <ClInclude Include="Core\Renderer\Materials\ReflectMaterial.h" />
+    <ClInclude Include="Core\Renderer\Materials\RefractiveMaterial.h" />
     <ClInclude Include="Core\Renderer\Ray.h" />
     <ClInclude Include="Core\Renderer\Renderer.h" />
     <ClInclude Include="Core\Objects\Triangle.h" />

@@ -13,14 +13,14 @@
 
 #include <iostream>
 
-Model::Model(glm::vec3 pos, float s, Mesh * m, Material * material) : Object(pos, material), mesh(m), scale(s), yawRotation(0.0f)
+Model::Model(glm::vec3 pos, float s, Mesh * m, Material * material) : Object(pos, material), mesh(m), scale(s), pitchRotation(0.0f), yawRotation(0.0f), rollRotation(0.0f)
 {
 	this->transformedVertices.resize(mesh->vertices.size());
 	//Calculates the transformed vertices for this object's scale and position
 	this->transformModelVertices();
 }
 
-Model::Model(glm::vec3 pos, float s, float yaw, std::string path, Material * material) : Object(pos, material), scale(s), yawRotation(yaw)
+Model::Model(glm::vec3 pos, float s, std::string path, Material * material) : Object(pos, material), scale(s), pitchRotation(0.0f), yawRotation(0.0f), rollRotation(0.0f)
 {
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFile(path, aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
@@ -35,6 +35,14 @@ Model::Model(glm::vec3 pos, float s, float yaw, std::string path, Material * mat
 
 	mesh = &meshList[0];
 	this->transformedVertices.resize(mesh->vertices.size());
+	this->transformModelVertices();
+}
+
+void Model::setRotation(float pitch, float yaw, float roll)
+{
+	this->pitchRotation = pitch;
+	this->yawRotation = yaw;
+	this->rollRotation = roll;
 	this->transformModelVertices();
 }
 
@@ -135,7 +143,9 @@ void Model::transformModelVertices()
 {
 	glm::mat4 transformMatrix = glm::mat4(1.0f);
 	transformMatrix = glm::translate(transformMatrix, position);
+	transformMatrix = glm::rotate(transformMatrix, glm::radians(pitchRotation), glm::vec3(1, 0, 0));
 	transformMatrix = glm::rotate(transformMatrix, glm::radians(yawRotation), glm::vec3(0, 1, 0));
+	transformMatrix = glm::rotate(transformMatrix, glm::radians(rollRotation), glm::vec3(0, 0, 1));
 	transformMatrix = glm::scale(transformMatrix, glm::vec3(scale));
 	for (uint32_t i = 0; i < mesh->vertices.size(); i++)
 	{

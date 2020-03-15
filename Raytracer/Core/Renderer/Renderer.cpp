@@ -10,6 +10,7 @@
 #include "Lights/Light.h"
 #include "../Math/MathFunctions.h"
 #include "Materials/Material.h"
+#include "Materials/RefractiveMaterial.h"
 
 const int Renderer::MAX_RAY_DEPTH = 4;
 
@@ -52,13 +53,16 @@ std::vector<glm::vec3>& Renderer::getFramebuffer()
 
 glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& objectList, std::vector<Light*>& lightList, const uint32_t & depth)
 {
+	//Background color which will be returned if the ray hits no objects or the depth limit is reached
+	glm::vec3 backgroundColor = glm::vec3(0.0f, 0.0f, 0.5f);
+
 	//Background color is specified, if there is no hit in the trace, the background color will be provided
 	glm::vec3 hitColor = glm::vec3(0.0f, 0.0f, 0.0f);
 	
 	//Return the background color if the current ray has cast more reflection rays than the max depth allows
 	if (depth > MAX_RAY_DEPTH)
 	{
-		return hitColor;
+		return backgroundColor;
 	}
 
 	//Value used in ray parameterization to calculate the intersection point
@@ -116,7 +120,8 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 			//there is no total interal reflection
 			if (reflectionMix < 1.0f)
 			{
-				glm::vec3 refractionDirection = getRefractionVector(ray.getDirectionVector(), normal, 1.3f);
+				RefractiveMaterial * material = (RefractiveMaterial*)(&nearestHit->getMaterial());
+				glm::vec3 refractionDirection = getRefractionVector(ray.getDirectionVector(), normal, material->getIndexOfRefraction());
 				refractionColor = getColorFromRaycast(Ray(intersectionPoint, refractionDirection), objectList, lightList, depth + 1);
 			}
 
@@ -127,9 +132,12 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 			hitColor += reflectionColor * reflectionMix + refractionColor * (1 - reflectionMix);
 			break;
 		}
+		return hitColor;
 	}
-
-	return hitColor;
+	else
+	{
+		return backgroundColor;
+	}
 }
 
 bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & nearestHitParameter, Object *& objectHit, float upperBound, IntersectionData & intersectionData)
