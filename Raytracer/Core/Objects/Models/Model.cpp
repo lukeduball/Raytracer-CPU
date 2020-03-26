@@ -50,14 +50,13 @@ void Model::setRotation(float pitch, float yaw, float roll)
 bool Model::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
 {
 	//Calculate the number of triangles by taking the indices and dividing by 3
-	size_t numTriangles = mesh->indices.size() / 3;
+	size_t numTriangles = mesh->faces.size();
 	for (uint32_t i = 0; i < numTriangles; i++)
 	{
-		//Calculate the index by multiplying the current triangle by 3
-		uint32_t j = i * 3;
-		uint32_t vertex1Index = this->mesh->indices[j];
-		uint32_t vertex2Index = this->mesh->indices[j + 1];
-		uint32_t vertex3Index = this->mesh->indices[j + 2];
+		Face face = this->mesh->faces[i];
+		uint32_t vertex1Index = face.indices[0];
+		uint32_t vertex2Index = face.indices[1];
+		uint32_t vertex3Index = face.indices[2];
 
 		//Get the vertex data for the data at the given indices
 		glm::vec3 & vertex1 = this->transformedVertices[vertex1Index];
@@ -70,7 +69,7 @@ bool Model::intersect(const Ray & ray, float & parameter, IntersectionData & int
 		{
 			parameter = rayParameter;
 			//Capture the index number of the triangle for use in normal calculation later
-			intersectionData.index = j;
+			intersectionData.index = i;
 		}
 	}
 	//If the paramter is equal to Infinity, the ray did not intersect the model
@@ -80,9 +79,10 @@ bool Model::intersect(const Ray & ray, float & parameter, IntersectionData & int
 void Model::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords)
 {
 	//Get the vertex data from the index provided by the intersection data
-	glm::vec3 vertex1 = this->transformedVertices[this->mesh->indices[intersectionData.index]];
-	glm::vec3 vertex2 = this->transformedVertices[this->mesh->indices[intersectionData.index + 1]];
-	glm::vec3 vertex3 = this->transformedVertices[this->mesh->indices[intersectionData.index + 2]];
+	Face face = this->mesh->faces[intersectionData.index];
+	glm::vec3 vertex1 = this->transformedVertices[face.indices[0]];
+	glm::vec3 vertex2 = this->transformedVertices[face.indices[1]];
+	glm::vec3 vertex3 = this->transformedVertices[face.indices[2]];
 	//Calculate the normal by taking the cross product of the difference of the vertices
 	normal = glm::normalize(glm::cross(vertex2 - vertex1, vertex3 - vertex1));
 
@@ -128,13 +128,16 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 	for (uint32_t i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
+		Face resultFace;
 		for (uint32_t j = 0; j < face.mNumIndices; j++)
 		{
-			result.indices.push_back(face.mIndices[j]);
+			resultFace.indices[j] = face.mIndices[j];
 		}
-	}
 
-	//Material properties can be loaded here as well
+		//Load materials, normals, and texture coordinates
+
+		result.faces.push_back(resultFace);
+	}
 
 	return result;
 }

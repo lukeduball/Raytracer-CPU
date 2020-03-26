@@ -87,7 +87,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Luke\Documents\Visual Studio 2017\Projects\Raytracer\Raytracer\Dependencies\assimp\include;C:\Users\Luke\Documents\Visual Studio 2017\Projects\Raytracer\Raytracer\Dependencies\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Luke\Documents\Visual Studio 2017\Projects\Raytracer\Raytracer\Dependencies\stb;C:\Users\Luke\Documents\Visual Studio 2017\Projects\Raytracer\Raytracer\Dependencies\assimp\include;C:\Users\Luke\Documents\Visual Studio 2017\Projects\Raytracer\Raytracer\Dependencies\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,7 +118,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\Luke\Documents\Visual Studio 2017\Projects\Raytracer\Raytracer\Dependencies\assimp\include;C:\Users\Luke\Documents\Visual Studio 2017\Projects\Raytracer\Raytracer\Dependencies\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Luke\Documents\Visual Studio 2017\Projects\Raytracer\Raytracer\Dependencies\stb;C:\Users\Luke\Documents\Visual Studio 2017\Projects\Raytracer\Raytracer\Dependencies\assimp\include;C:\Users\Luke\Documents\Visual Studio 2017\Projects\Raytracer\Raytracer\Dependencies\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -137,6 +137,7 @@
     <ClCompile Include="Core\Objects\Sphere.cpp" />
     <ClCompile Include="Core\Renderer\Camera.cpp" />
     <ClCompile Include="Core\Renderer\Image.cpp" />
+    <ClCompile Include="Core\Renderer\Images\ImageLoader.cpp" />
     <ClCompile Include="Core\Renderer\Lights\DirectionalLight.cpp" />
     <ClCompile Include="Core\Renderer\Lights\Light.cpp" />
     <ClCompile Include="Core\Renderer\Lights\PointLight.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="Core\Objects\Sphere.h" />
     <ClInclude Include="Core\Renderer\Camera.h" />
     <ClInclude Include="Core\Renderer\Image.h" />
+    <ClInclude Include="Core\Renderer\Images\ImageLoader.h" />
     <ClInclude Include="Core\Renderer\Lights\DirectionalLight.h" />
     <ClInclude Include="Core\Renderer\Lights\Light.h" />
     <ClInclude Include="Core\Renderer\Lights\PointLight.h" />

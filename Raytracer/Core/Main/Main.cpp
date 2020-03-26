@@ -43,16 +43,16 @@ int main()
 {
 	Mesh planeMesh;
 	planeMesh.vertices = {glm::vec3(-0.5f, 0.0f, 0.5f), glm::vec3(-0.5f, 0.0f, -0.5f), glm::vec3(0.5f, 0.0f, -0.5f), glm::vec3(0.5f, 0.0f, 0.5f)};
-	planeMesh.indices = { 0, 2, 1,
-						  2, 0, 3 };
+	planeMesh.faces.push_back(Face({ 0, 2, 1 }));
+	planeMesh.faces.push_back(Face({ 2, 0, 3 }));
 
 	Mesh halfBoxMesh;
 	halfBoxMesh.vertices = { glm::vec3(-0.5f, 0.0f, 0.5f), glm::vec3(-0.5f, 0.0f, -0.5f), glm::vec3(0.5f, 0.0f, -0.5f), glm::vec3(0.5f, 0.0f, 0.5f),
 							 glm::vec3(-0.5f, 1.0f, -0.5f), glm::vec3(0.5f, 1.0f, -0.5f) };
-	halfBoxMesh.indices = { 0, 2, 1,
-							2, 0, 3,
-							5, 4, 1,
-							5, 1, 2};	
+	halfBoxMesh.faces.push_back(Face({ 0, 2, 1 }));
+	halfBoxMesh.faces.push_back(Face({ 2, 0, 3 }));
+	halfBoxMesh.faces.push_back(Face({ 5, 4, 1 }));
+	halfBoxMesh.faces.push_back(Face({ 5, 1, 2 }));
 
 	//Defines the camera to be used in the scene, WIDTH / HEIGHT is the aspect ratio
 	Camera camera(glm::vec3(0.0f, 2.5f, 2.0f), 0, 0, 45, (float)WIDTH / (float)HEIGHT);
@@ -78,7 +78,7 @@ int main()
 	strawModel->setRotation(0.0f, 0.0f, -45.0f);
 	objectList.push_back(strawModel);
 	objectList.push_back(new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, "Resources/Models/cylinder.obj", &water));
-	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, &halfBoxMesh, &reflect));
+	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, &halfBoxMesh, &whiteDiffuse));
 	//objectList.push_back(new Model(glm::vec3(0.0f, 2.0f, -7.0f), 2.0f, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f), "Resources/Models/monkey.obj"));
 	
 	//Initializes the raytracer renderer
