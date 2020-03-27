@@ -11,8 +11,6 @@ class Material;
 struct Face
 {
 	uint32_t indices[3];
-	glm::vec2 textureCoords[3];
-	glm::vec3 normals[3];
 	Material * material;
 
 };
@@ -23,4 +21,6 @@ public:
 	Mesh();
 	std::vector<Face> faces;
 	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec2> textureCoords;
+	std::vector<glm::vec3> normals;
 };

@@ -13,7 +13,7 @@ void PointLight::getLightDirectionAndIntensity(glm::vec3 objectPoint, glm::vec3 
 	lightDirection = objectPoint - this->position;
 
 	//Calculate the tDistance to send back to the trace function to bound upper range for object intersection
-	float distanceSquared = lightDirection.length();
+	float distanceSquared = glm::length(lightDirection);
 	tDistance = sqrtf(distanceSquared);
 
 	lightDirection = glm::normalize(lightDirection);

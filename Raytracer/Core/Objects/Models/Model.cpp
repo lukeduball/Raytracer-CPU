@@ -23,7 +23,7 @@ Model::Model(glm::vec3 pos, float s, Mesh * m, Material * material) : Object(pos
 Model::Model(glm::vec3 pos, float s, std::string path, Material * material) : Object(pos, material), scale(s), pitchRotation(0.0f), yawRotation(0.0f), rollRotation(0.0f)
 {
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFile(path, aiProcess_FlipUVs | aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
+	const aiScene *scene = importer.ReadFile(path, aiProcess_FlipUVs | aiProcess_Triangulate);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
@@ -86,8 +86,42 @@ void Model::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersecti
 	//Calculate the normal by taking the cross product of the difference of the vertices
 	normal = glm::normalize(glm::cross(vertex2 - vertex1, vertex3 - vertex1));
 
+	if (this->mesh->textureCoords.size() > 0)
+	{
+		textureCoords = calculateUVCoordinatesAtIntersection(intersectionPoint, face);
+	}
+	else
+	{
+		textureCoords = glm::vec2(0, 0);
+	}
+}
 
-	textureCoords = glm::vec2();
+glm::vec2 Model::calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face)
+{
+	//Get the vertex positions for each vertex in the face
+	glm::vec3 vertex1 = this->transformedVertices[face.indices[0]];
+	glm::vec3 vertex2 = this->transformedVertices[face.indices[1]];
+	glm::vec3 vertex3 = this->transformedVertices[face.indices[2]];
+
+	//Calculate the vectors from each vertex to the intersection point
+	glm::vec3 v1ToPointVector = vertex1 - intersectionPoint;
+	glm::vec3 v2ToPointVector = vertex2 - intersectionPoint;
+	glm::vec3 v3ToPointVector = vertex3 - intersectionPoint;
+
+	//Calculates the area of the triangle
+	float area = glm::length(glm::cross(vertex1 - vertex2, vertex1 - vertex3));
+	//Calculate the ratio that each of the sub triangles areas take up
+	float area1Ratio = glm::length(glm::cross(v2ToPointVector, v3ToPointVector)) / area;
+	float area2Ratio = glm::length(glm::cross(v3ToPointVector, v1ToPointVector)) / area;
+	float area3Ratio = glm::length(glm::cross(v1ToPointVector, v2ToPointVector)) / area;
+
+	//Get the UV coordinates at each of the vertices
+	glm::vec2 v1UVCoords = this->mesh->textureCoords[face.indices[0]];
+	glm::vec2 v2UVCoords = this->mesh->textureCoords[face.indices[1]];
+	glm::vec2 v3UVCoords = this->mesh->textureCoords[face.indices[2]];
+
+	//Interpolate each UV coordinate from the 3 vertices using the area ratios calculated from the subtriangles
+	return v1UVCoords * area1Ratio + v2UVCoords * area2Ratio + v3UVCoords * area3Ratio;
 }
 
 void Model::processNode(aiNode * node, const aiScene * scene)
@@ -121,7 +155,10 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		//Check if the mesh contains texture coordinates
 		if (mesh->mTextureCoords[0])
 		{
-			//Add texture coordinate data here
+			glm::vec2 textureCoords;
+			textureCoords.x = mesh->mTextureCoords[0][i].x;
+			textureCoords.y = mesh->mTextureCoords[0][i].y;
+			result.textureCoords.push_back(textureCoords);
 		}
 	}
 

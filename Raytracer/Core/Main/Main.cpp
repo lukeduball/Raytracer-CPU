@@ -41,18 +41,8 @@ void cleanup(std::vector<Object*> & objectList, std::vector<Light*> & lightList)
 
 int main()
 {
-	Mesh planeMesh;
-	planeMesh.vertices = {glm::vec3(-0.5f, 0.0f, 0.5f), glm::vec3(-0.5f, 0.0f, -0.5f), glm::vec3(0.5f, 0.0f, -0.5f), glm::vec3(0.5f, 0.0f, 0.5f)};
-	planeMesh.faces.push_back(Face({ 0, 2, 1 }));
-	planeMesh.faces.push_back(Face({ 2, 0, 3 }));
-
-	Mesh halfBoxMesh;
-	halfBoxMesh.vertices = { glm::vec3(-0.5f, 0.0f, 0.5f), glm::vec3(-0.5f, 0.0f, -0.5f), glm::vec3(0.5f, 0.0f, -0.5f), glm::vec3(0.5f, 0.0f, 0.5f),
-							 glm::vec3(-0.5f, 1.0f, -0.5f), glm::vec3(0.5f, 1.0f, -0.5f) };
-	halfBoxMesh.faces.push_back(Face({ 0, 2, 1 }));
-	halfBoxMesh.faces.push_back(Face({ 2, 0, 3 }));
-	halfBoxMesh.faces.push_back(Face({ 5, 4, 1 }));
-	halfBoxMesh.faces.push_back(Face({ 5, 1, 2 }));
+	//Initializes the raytracer renderer
+	Renderer renderer(WIDTH, HEIGHT);
 
 	//Defines the camera to be used in the scene, WIDTH / HEIGHT is the aspect ratio
 	Camera camera(glm::vec3(0.0f, 2.5f, 2.0f), 0, 0, 45, (float)WIDTH / (float)HEIGHT);
@@ -62,10 +52,13 @@ int main()
 	//lightList.push_back(new DirectionalLight(glm::vec3(0, 0, -1), glm::vec3(1, 1, 1), 2));
 	lightList.push_back(new DirectionalLight(glm::vec3(1, -1, -1), glm::vec3(1, 1, 1), 2));
 
+	int32_t missing_texture = renderer.getImageLoader().loadTexture("bad_path");
+
 	std::vector<Object*> objectList;
 	DiffuseMaterial whiteDiffuse = DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f));
 	DiffuseMaterial orangeDiffuse = DiffuseMaterial(glm::vec3(1.0f, 0.5f, 0.0f));
 	DiffuseMaterial greenDiffuse = DiffuseMaterial(glm::vec3(0.0f, 1.0f, 0.0f));
+	DiffuseMaterial missingTextureDiffuse = DiffuseMaterial(missing_texture);
 	ReflectMaterial reflect = ReflectMaterial();
 	RefractiveMaterial water = RefractiveMaterial(1.3f);
 	//objectList.push_back(new Sphere(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, &water));
@@ -73,16 +66,13 @@ int main()
 	//objectList.push_back(new Sphere(glm::vec3(1.0f, 1.0f, -6.0f), 0.35f,  &greenDiffuse));
 	//objectList.push_back(new Sphere(glm::vec3(0.0f, 1.0f, -9.0f), 1.0f, &whiteDiffuse));
 	//objectList.push_back(new Sphere(glm::vec3(1.0f, 0.0f, -6.0f), 0.25f,  &greenDiffuse));
-	objectList.push_back(new Sphere(glm::vec3(-1.5f, 2.0f, -6.0f), 0.25f, &orangeDiffuse));
-	Model * strawModel = new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, "Resources/Models/straw.obj", &greenDiffuse);
-	strawModel->setRotation(0.0f, 0.0f, -45.0f);
-	objectList.push_back(strawModel);
-	objectList.push_back(new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, "Resources/Models/cylinder.obj", &water));
-	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, &halfBoxMesh, &whiteDiffuse));
+	objectList.push_back(new Sphere(glm::vec3(-1.5f, 2.0f, -6.0f), 1.0f, &missingTextureDiffuse));
+	//Model * strawModel = new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, "Resources/Models/straw.obj", &greenDiffuse);
+	//strawModel->setRotation(0.0f, 0.0f, -45.0f);
+	//objectList.push_back(strawModel);
+	//objectList.push_back(new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, "Resources/Models/cylinder.obj", &water));
+	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, "Resources/Models/plane.obj", &missingTextureDiffuse));
 	//objectList.push_back(new Model(glm::vec3(0.0f, 2.0f, -7.0f), 2.0f, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f), "Resources/Models/monkey.obj"));
-	
-	//Initializes the raytracer renderer
-	Renderer renderer(WIDTH, HEIGHT);
 
 	std::cout << "Start raytracing scene!" << std::endl;
 	//Stores the clock time at the start of the rendering process

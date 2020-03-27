@@ -1,6 +1,17 @@
 #include "ImageLoader.h"
 
-uint32_t ImageLoader::loadTexture(const char * path)
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
+#include <iostream>
+
+ImageLoader::ImageLoader()
+{
+	//Load the missing texture image to first to occupy index 0 o the loadedTextures list
+	loadTexture("Resources/Textures/missing_texture.png");
+}
+
+int32_t ImageLoader::loadTexture(const char * path)
 {
 	int width, height;
 
@@ -8,11 +19,12 @@ uint32_t ImageLoader::loadTexture(const char * path)
 
 	if (image == nullptr)
 	{
+		std::cout << "WARNING: Could not find image at path: " << path << std::endl;
 		//this returns the image id for the missing texture image located at loadedTextures[0]
 		return 0;
 	}
 
-	uint32_t textureID = this->loadedTextures.size();
+	int32_t textureID = this->loadedTextures.size();
 	Texture2D texture;
 	texture.image = image;
 	texture.width = width;
@@ -22,7 +34,7 @@ uint32_t ImageLoader::loadTexture(const char * path)
 	return textureID;
 }
 
-glm::vec3 ImageLoader::getColorAtTextureUV(uint32_t textureID, float u, float v)
+glm::vec3 ImageLoader::getColorAtTextureUV(int32_t textureID, float u, float v)
 {
 	Texture2D texture = this->loadedTextures[textureID];
 

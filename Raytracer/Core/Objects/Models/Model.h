@@ -27,6 +27,8 @@ private:
 	std::vector<Mesh> meshList;
 	Mesh * mesh;
 
+	glm::vec2 calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face);
+
 	void processNode(aiNode * node, const aiScene * scene);
 	Mesh processMesh(aiMesh *mesh, const aiScene * scene);
 

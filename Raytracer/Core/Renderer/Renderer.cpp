@@ -14,7 +14,7 @@
 
 const int Renderer::MAX_RAY_DEPTH = 4;
 
-Renderer::Renderer(uint32_t w, uint32_t h) : width(w), height(h)
+Renderer::Renderer(uint32_t w, uint32_t h) : width(w), height(h), imageLoader(ImageLoader())
 {
 	//Resize the framebuffer to the total amount of pixels
 	framebuffer.resize(width * height);
@@ -39,11 +39,16 @@ void Renderer::render(Camera & camera, std::vector<Object*>& objectList, std::ve
 			//Convert the pixel position to world space placing the plane 1 unit in front of the camera
 			glm::vec3 position = camera.convertCameraSpaceToWorldSpace(glm::vec3(pX, pY, 1));
 			//Create the ray by calculating the direction the ray will be cast in by subtracting the origin of the camera
-			Ray ray = Ray(position, glm::normalize(position - camera.getOrigin()));
+ 			Ray ray = Ray(position, glm::normalize(position - camera.getOrigin()));
 			//Populate the color of the framebuffer by casting the ray into the scene and checking for intersections
 			framebuffer[x + width * y] = getColorFromRaycast(ray, objectList, lightList);
 		}
 	}
+}
+
+ImageLoader & Renderer::getImageLoader()
+{
+	return this->imageLoader;
 }
 
 std::vector<glm::vec3>& Renderer::getFramebuffer()
@@ -86,6 +91,7 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 		switch (nearestHit->getMaterial().getMaterialType())
 		{
 		case Material::Type::DIFFUSE:
+			glm::vec3 colorAtIntersection = getObjectHitColor(textureCoords, nearestHit->getMaterial());
 			//Loop through each light in the scene
 			for (Light* light : lightList)
 			{
@@ -104,7 +110,7 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 				if (!inShadow)
 				{
 					//Contribute shading from the light source
-					hitColor += nearestHit->getMaterial().getAlbedo() / (float)M_PI * attenuatedLight * std::max(0.0f, glm::dot(normal, -lightDirection));
+					hitColor += colorAtIntersection / (float)M_PI * attenuatedLight * std::max(0.0f, glm::dot(normal, -lightDirection));
 				}
 			}
 			break;
@@ -163,6 +169,16 @@ bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & 
 	}
 
 	return objectHit != nullptr;
+}
+
+glm::vec3 Renderer::getObjectHitColor(const glm::vec2 & textureCoords, const Material & material)
+{
+	if (material.getTextureID() < 0)
+	{
+		return material.getAlbedo();
+	}
+
+	return imageLoader.getColorAtTextureUV(material.getTextureID(), textureCoords.x, textureCoords.y);
 }
 
 glm::vec3 Renderer::getReflectionVector(const glm::vec3 incidentDirection, const glm::vec3 normal)
