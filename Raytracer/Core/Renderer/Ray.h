@@ -2,13 +2,6 @@
 
 #include <glm/vec3.hpp>
 
-struct IntersectionResult
-{
-	bool doesIntersect = false;
-	glm::vec3 intersectionPoint;
-	glm::vec3 intersectionNormal;
-};
-
 class Ray
 {
 public:

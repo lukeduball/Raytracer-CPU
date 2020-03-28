@@ -23,11 +23,10 @@ private:
 	float yawRotation;
 	float pitchRotation;
 	float rollRotation;
-	std::vector<glm::vec3> transformedVertices;
+	std::vector<std::vector<glm::vec3>> transformedVerticesList;
 	std::vector<Mesh> meshList;
-	Mesh * mesh;
 
-	glm::vec2 calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face);
+	glm::vec2 calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex);
 
 	void processNode(aiNode * node, const aiScene * scene);
 	Mesh processMesh(aiMesh *mesh, const aiScene * scene);

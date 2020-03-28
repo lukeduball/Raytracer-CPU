@@ -8,7 +8,8 @@ class Material;
 
 struct IntersectionData
 {
-	uint32_t index;
+	uint32_t meshIndex;
+	uint32_t faceIndex;
 };
 
 class Object

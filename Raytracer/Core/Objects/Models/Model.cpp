@@ -13,9 +13,10 @@
 
 #include <iostream>
 
-Model::Model(glm::vec3 pos, float s, Mesh * m, Material * material) : Object(pos, material), mesh(m), scale(s), pitchRotation(0.0f), yawRotation(0.0f), rollRotation(0.0f)
+Model::Model(glm::vec3 pos, float s, Mesh * m, Material * material) : Object(pos, material), scale(s), pitchRotation(0.0f), yawRotation(0.0f), rollRotation(0.0f)
 {
-	this->transformedVertices.resize(mesh->vertices.size());
+	this->meshList.push_back(*m);
+	this->transformedVerticesList.resize(1);
 	//Calculates the transformed vertices for this object's scale and position
 	this->transformModelVertices();
 }
@@ -32,9 +33,8 @@ Model::Model(glm::vec3 pos, float s, std::string path, Material * material) : Ob
 	}
 
 	processNode(scene->mRootNode, scene);
+	this->transformedVerticesList.resize(this->meshList.size());
 
-	mesh = &meshList[0];
-	this->transformedVertices.resize(mesh->vertices.size());
 	this->transformModelVertices();
 }
 
@@ -49,27 +49,32 @@ void Model::setRotation(float pitch, float yaw, float roll)
 
 bool Model::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
 {
-	//Calculate the number of triangles by taking the indices and dividing by 3
-	size_t numTriangles = mesh->faces.size();
-	for (uint32_t i = 0; i < numTriangles; i++)
+	for (uint32_t j = 0; j < this->meshList.size(); j++)
 	{
-		Face face = this->mesh->faces[i];
-		uint32_t vertex1Index = face.indices[0];
-		uint32_t vertex2Index = face.indices[1];
-		uint32_t vertex3Index = face.indices[2];
-
-		//Get the vertex data for the data at the given indices
-		glm::vec3 & vertex1 = this->transformedVertices[vertex1Index];
-		glm::vec3 & vertex2 = this->transformedVertices[vertex2Index];
-		glm::vec3 & vertex3 = this->transformedVertices[vertex3Index];
-
-		float rayParameter = MathFunctions::T_INFINITY;
-		//Check the triangle for intersection, do not accept an intersection if the rayParameter is zero because the intersection is with the same face and check it is the nearest intersection
-		if (Triangle::intersectTriangle(ray, vertex1, vertex2, vertex3, rayParameter) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < parameter)
+		Mesh mesh = meshList[j];
+		size_t numTriangles = mesh.faces.size();
+		for (uint32_t i = 0; i < numTriangles; i++)
 		{
-			parameter = rayParameter;
-			//Capture the index number of the triangle for use in normal calculation later
-			intersectionData.index = i;
+			Face face = mesh.faces[i];
+			uint32_t vertex1Index = face.indices[0];
+			uint32_t vertex2Index = face.indices[1];
+			uint32_t vertex3Index = face.indices[2];
+
+			//Get the vertex data for the data at the given indices
+			glm::vec3 & vertex1 = this->transformedVerticesList[j][vertex1Index];
+			glm::vec3 & vertex2 = this->transformedVerticesList[j][vertex2Index];
+			glm::vec3 & vertex3 = this->transformedVerticesList[j][vertex3Index];
+
+			float rayParameter = MathFunctions::T_INFINITY;
+			//Check the triangle for intersection, do not accept an intersection if the rayParameter is zero because the intersection is with the same face and check it is the nearest intersection
+			if (Triangle::intersectTriangle(ray, vertex1, vertex2, vertex3, rayParameter) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < parameter)
+			{
+				parameter = rayParameter;
+				//Capture the index number of the triangle for use in normal calculation later
+				intersectionData.faceIndex = i;
+				//Capture the index of the mesh for use in calculations later
+				intersectionData.meshIndex = j;
+			}
 		}
 	}
 	//If the paramter is equal to Infinity, the ray did not intersect the model
@@ -78,17 +83,19 @@ bool Model::intersect(const Ray & ray, float & parameter, IntersectionData & int
 
 void Model::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords)
 {
+	//Get the current mesh intersected from the index provided by the intersection data
+	Mesh mesh = this->meshList[intersectionData.meshIndex];
 	//Get the vertex data from the index provided by the intersection data
-	Face face = this->mesh->faces[intersectionData.index];
-	glm::vec3 vertex1 = this->transformedVertices[face.indices[0]];
-	glm::vec3 vertex2 = this->transformedVertices[face.indices[1]];
-	glm::vec3 vertex3 = this->transformedVertices[face.indices[2]];
+	Face face = mesh.faces[intersectionData.faceIndex];
+	glm::vec3 vertex1 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[0]];
+	glm::vec3 vertex2 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[1]];
+	glm::vec3 vertex3 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[2]];
 	//Calculate the normal by taking the cross product of the difference of the vertices
 	normal = glm::normalize(glm::cross(vertex2 - vertex1, vertex3 - vertex1));
 
-	if (this->mesh->textureCoords.size() > 0)
+	if (mesh.textureCoords.size() > 0)
 	{
-		textureCoords = calculateUVCoordinatesAtIntersection(intersectionPoint, face);
+		textureCoords = calculateUVCoordinatesAtIntersection(intersectionPoint, face, intersectionData.meshIndex);
 	}
 	else
 	{
@@ -96,12 +103,14 @@ void Model::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersecti
 	}
 }
 
-glm::vec2 Model::calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face)
+glm::vec2 Model::calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex)
 {
+	Mesh mesh = this->meshList[meshIndex];
+
 	//Get the vertex positions for each vertex in the face
-	glm::vec3 vertex1 = this->transformedVertices[face.indices[0]];
-	glm::vec3 vertex2 = this->transformedVertices[face.indices[1]];
-	glm::vec3 vertex3 = this->transformedVertices[face.indices[2]];
+	glm::vec3 vertex1 = this->transformedVerticesList[meshIndex][face.indices[0]];
+	glm::vec3 vertex2 = this->transformedVerticesList[meshIndex][face.indices[1]];
+	glm::vec3 vertex3 = this->transformedVerticesList[meshIndex][face.indices[2]];
 
 	//Calculate the vectors from each vertex to the intersection point
 	glm::vec3 v1ToPointVector = vertex1 - intersectionPoint;
@@ -116,9 +125,9 @@ glm::vec2 Model::calculateUVCoordinatesAtIntersection(const glm::vec3 & intersec
 	float area3Ratio = glm::length(glm::cross(v1ToPointVector, v2ToPointVector)) / area;
 
 	//Get the UV coordinates at each of the vertices
-	glm::vec2 v1UVCoords = this->mesh->textureCoords[face.indices[0]];
-	glm::vec2 v2UVCoords = this->mesh->textureCoords[face.indices[1]];
-	glm::vec2 v3UVCoords = this->mesh->textureCoords[face.indices[2]];
+	glm::vec2 v1UVCoords = mesh.textureCoords[face.indices[0]];
+	glm::vec2 v2UVCoords = mesh.textureCoords[face.indices[1]];
+	glm::vec2 v3UVCoords = mesh.textureCoords[face.indices[2]];
 
 	//Interpolate each UV coordinate from the 3 vertices using the area ratios calculated from the subtriangles
 	return v1UVCoords * area1Ratio + v2UVCoords * area2Ratio + v3UVCoords * area3Ratio;
@@ -187,9 +196,14 @@ void Model::transformModelVertices()
 	transformMatrix = glm::rotate(transformMatrix, glm::radians(yawRotation), glm::vec3(0, 1, 0));
 	transformMatrix = glm::rotate(transformMatrix, glm::radians(rollRotation), glm::vec3(0, 0, 1));
 	transformMatrix = glm::scale(transformMatrix, glm::vec3(scale));
-	for (uint32_t i = 0; i < mesh->vertices.size(); i++)
+	for (uint32_t j = 0; j < meshList.size(); j++)
 	{
-		//Transform the vertices by using the transform matrix multiplied by the meshes vertex data
-		this->transformedVertices[i] = transformMatrix * glm::vec4(mesh->vertices[i], 1.0f);
+		Mesh mesh = meshList[j];
+		this->transformedVerticesList[j].resize(mesh.vertices.size());
+		for (uint32_t i = 0; i < mesh.vertices.size(); i++)
+		{
+			//Transform the vertices by using the transform matrix multiplied by the meshes vertex data
+			this->transformedVerticesList[j][i] = transformMatrix * glm::vec4(mesh.vertices[i], 1.0f);
+		}
 	}
 }
