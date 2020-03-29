@@ -24,13 +24,29 @@ int32_t ImageLoader::loadTexture(const char * path)
 		return 0;
 	}
 
+	//Loops through all the textures to ensure that a texture at the same path is not loaded again
+	for (uint32_t i = 0; i < loadedTextures.size(); i++)
+	{
+		Texture2D texture = loadedTextures[i];
+		if (std::strcmp(texture.path.c_str(), path) == 0)
+		{
+			return i;
+		}
+	}
+
+	//Sets the current texture id to the current size of the list because this index is where the texture will be stored
 	int32_t textureID = this->loadedTextures.size();
+	//Creates the texture
 	Texture2D texture;
 	texture.image = image;
 	texture.width = width;
 	texture.height = height;
+	//Stores the path of the image so that it can be used to make sure textures are not repeated
+	texture.path = std::string(path);
+	//Adds the textures into the loadedTextures list
 	this->loadedTextures.push_back(texture);
 
+	//Return the index location in the list of the loaded texture
 	return textureID;
 }
 

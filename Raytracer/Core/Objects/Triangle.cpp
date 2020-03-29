@@ -2,6 +2,7 @@
 
 #include "../Renderer/Ray.h"
 #include "../Math/MathFunctions.h"
+#include "../Renderer/Materials/Material.h"
 
 #include <glm/geometric.hpp>
 
@@ -14,12 +15,14 @@ bool Triangle::intersect(const Ray & ray, float & parameter, IntersectionData & 
 	return intersectTriangle(ray, this->vertex1, this->vertex2, this->vertex3, parameter);
 }
 
-void Triangle::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords)
+void Triangle::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords, Material & material)
 {
 	//Calculate the normal by taking the cross product of the difference of the vertices
 	normal = glm::normalize(glm::cross(this->vertex2 - this->vertex1, this->vertex3 - this->vertex1));
 
 	textureCoords = glm::vec2();
+
+	material = this->getMaterial();
 }
 
 //Implmentation of Moller-Trumbore Algorithm from https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/moller-trumbore-ray-triangle-intersection

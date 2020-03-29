@@ -9,6 +9,10 @@ Material::Material(Type t, int32_t texID) : type(t), textureID(texID), albedo(gl
 {
 }
 
+Material::Material() : type(Type::DIFFUSE)
+{
+}
+
 Material::Type Material::getMaterialType() const
 {
 	return this->type;

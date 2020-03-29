@@ -27,11 +27,11 @@ bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & in
 {
 	for (uint32_t j = 0; j < this->model->getMeshList().size(); j++)
 	{
-		Mesh mesh = this->model->getMeshList()[j];
-		size_t numTriangles = mesh.faces.size();
+		Mesh * mesh = this->model->getMeshList()[j];
+		size_t numTriangles = mesh->faces.size();
 		for (uint32_t i = 0; i < numTriangles; i++)
 		{
-			Face face = mesh.faces[i];
+			Face face = mesh->faces[i];
 			uint32_t vertex1Index = face.indices[0];
 			uint32_t vertex2Index = face.indices[1];
 			uint32_t vertex3Index = face.indices[2];
@@ -57,19 +57,19 @@ bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & in
 	return parameter != MathFunctions::T_INFINITY;
 }
 
-void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords)
+void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords, Material & material)
 {
 	//Get the current mesh intersected from the index provided by the intersection data
-	Mesh mesh = this->model->getMeshList()[intersectionData.meshIndex];
+	Mesh * mesh = this->model->getMeshList()[intersectionData.meshIndex];
 	//Get the vertex data from the index provided by the intersection data
-	Face face = mesh.faces[intersectionData.faceIndex];
+	Face face = mesh->faces[intersectionData.faceIndex];
 	glm::vec3 vertex1 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[0]];
 	glm::vec3 vertex2 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[1]];
 	glm::vec3 vertex3 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[2]];
 	//Calculate the normal by taking the cross product of the difference of the vertices
 	normal = glm::normalize(glm::cross(vertex2 - vertex1, vertex3 - vertex1));
 
-	if (mesh.textureCoords.size() > 0)
+	if (mesh->textureCoords.size() > 0)
 	{
 		textureCoords = calculateUVCoordinatesAtIntersection(intersectionPoint, face, intersectionData.meshIndex);
 	}
@@ -77,11 +77,21 @@ void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 	{
 		textureCoords = glm::vec2(0, 0);
 	}
+
+	//If the underlaying Entity has a material, override all other mesh specific materials with this material
+	if (this->material)
+	{
+		material = this->getMaterial();
+	}
+	else
+	{
+		material = *face.material;
+	}
 }
 
 glm::vec2 Entity::calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex)
 {
-	Mesh mesh = this->model->getMeshList()[meshIndex];
+	Mesh * mesh = this->model->getMeshList()[meshIndex];
 
 	//Get the vertex positions for each vertex in the face
 	glm::vec3 vertex1 = this->transformedVerticesList[meshIndex][face.indices[0]];
@@ -101,9 +111,9 @@ glm::vec2 Entity::calculateUVCoordinatesAtIntersection(const glm::vec3 & interse
 	float area3Ratio = glm::length(glm::cross(v1ToPointVector, v2ToPointVector)) / area;
 
 	//Get the UV coordinates at each of the vertices
-	glm::vec2 v1UVCoords = mesh.textureCoords[face.indices[0]];
-	glm::vec2 v2UVCoords = mesh.textureCoords[face.indices[1]];
-	glm::vec2 v3UVCoords = mesh.textureCoords[face.indices[2]];
+	glm::vec2 v1UVCoords = mesh->textureCoords[face.indices[0]];
+	glm::vec2 v2UVCoords = mesh->textureCoords[face.indices[1]];
+	glm::vec2 v3UVCoords = mesh->textureCoords[face.indices[2]];
 
 	//Interpolate each UV coordinate from the 3 vertices using the area ratios calculated from the subtriangles
 	return v1UVCoords * area1Ratio + v2UVCoords * area2Ratio + v3UVCoords * area3Ratio;
@@ -119,12 +129,12 @@ void Entity::transformModelVertices()
 	transformMatrix = glm::scale(transformMatrix, glm::vec3(scale));
 	for (uint32_t j = 0; j < this->model->getMeshList().size(); j++)
 	{
-		Mesh mesh = this->model->getMeshList()[j];
-		this->transformedVerticesList[j].resize(mesh.vertices.size());
-		for (uint32_t i = 0; i < mesh.vertices.size(); i++)
+		Mesh * mesh = this->model->getMeshList()[j];
+		this->transformedVerticesList[j].resize(mesh->vertices.size());
+		for (uint32_t i = 0; i < mesh->vertices.size(); i++)
 		{
 			//Transform the vertices by using the transform matrix multiplied by the meshes vertex data
-			this->transformedVerticesList[j][i] = transformMatrix * glm::vec4(mesh.vertices[i], 1.0f);
+			this->transformedVerticesList[j][i] = transformMatrix * glm::vec4(mesh->vertices[i], 1.0f);
 		}
 	}
 }

@@ -84,14 +84,15 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 		glm::vec3 intersectionPoint = ray.getOrigin() + (ray.getDirectionVector() * nearestHitParameter);
 		glm::vec3 normal;
 		glm::vec2 textureCoords;
+		Material material;
 
 		//Outputs the normal and texture coordinates for the object that was intersected
-		nearestHit->getSurfaceData(intersectionPoint, intersectionData, normal, textureCoords);
+		nearestHit->getSurfaceData(intersectionPoint, intersectionData, normal, textureCoords, material);
 
-		switch (nearestHit->getMaterial().getMaterialType())
+		switch (material.getMaterialType())
 		{
 		case Material::Type::DIFFUSE:
-			glm::vec3 colorAtIntersection = getObjectHitColor(textureCoords, nearestHit->getMaterial());
+			glm::vec3 colorAtIntersection = getObjectHitColor(textureCoords, material);
 			//Loop through each light in the scene
 			for (Light* light : lightList)
 			{
@@ -126,8 +127,8 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 			//there is no total interal reflection
 			if (reflectionMix < 1.0f)
 			{
-				RefractiveMaterial * material = (RefractiveMaterial*)(&nearestHit->getMaterial());
-				glm::vec3 refractionDirection = getRefractionVector(ray.getDirectionVector(), normal, material->getIndexOfRefraction());
+				RefractiveMaterial * reflectiveMaterial = (RefractiveMaterial*)(&material);
+				glm::vec3 refractionDirection = getRefractionVector(ray.getDirectionVector(), normal, reflectiveMaterial->getIndexOfRefraction());
 				refractionColor = getColorFromRaycast(Ray(intersectionPoint, refractionDirection), objectList, lightList, depth + 1);
 			}
 
@@ -151,6 +152,7 @@ bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & 
 	nearestHitParameter = MathFunctions::T_INFINITY;
 	for (Object * object : objectList)
 	{
+		//TODO Change this line to work with per-face materials
 		//Allows shadow rays to disregard reflect and refract materials so shadows are not cast when the object should be transparent
 		if (ray.getRayType() == Ray::Type::SHADOW && object->getMaterial().getMaterialType() == Material::Type::REFLECT_AND_REFRACT)
 		{

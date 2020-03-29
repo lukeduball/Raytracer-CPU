@@ -15,7 +15,7 @@
 
 Model::Model(Mesh * m)
 {
-	this->meshList.push_back(*m);
+	this->meshList.push_back(m);
 }
 
 Model::Model(std::string path)
@@ -32,7 +32,15 @@ Model::Model(std::string path)
 	processNode(scene->mRootNode, scene);
 }
 
-std::vector<Mesh>& Model::getMeshList()
+Model::~Model()
+{
+	for (uint32_t i = 0; i < this->meshList.size(); i++)
+	{
+		delete this->meshList[i];
+	}
+}
+
+std::vector<Mesh*>& Model::getMeshList()
 {
 	return this->meshList;
 }
@@ -53,9 +61,9 @@ void Model::processNode(aiNode * node, const aiScene * scene)
 	}
 }
 
-Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
+Mesh * Model::processMesh(aiMesh * mesh, const aiScene * scene)
 {
-	Mesh result;
+	Mesh * result = new Mesh();
 
 	for (uint32_t i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -63,7 +71,7 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		position.x = mesh->mVertices[i].x;
 		position.y = mesh->mVertices[i].y;
 		position.z = mesh->mVertices[i].z;
-		result.vertices.push_back(position);
+		result->vertices.push_back(position);
 
 		//Check if the mesh contains texture coordinates
 		if (mesh->mTextureCoords[0])
@@ -71,7 +79,7 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 			glm::vec2 textureCoords;
 			textureCoords.x = mesh->mTextureCoords[0][i].x;
 			textureCoords.y = mesh->mTextureCoords[0][i].y;
-			result.textureCoords.push_back(textureCoords);
+			result->textureCoords.push_back(textureCoords);
 		}
 	}
 
@@ -86,7 +94,7 @@ Mesh Model::processMesh(aiMesh * mesh, const aiScene * scene)
 
 		//Load materials, normals, and texture coordinates
 
-		result.faces.push_back(resultFace);
+		result->faces.push_back(resultFace);
 	}
 
 	return result;

@@ -17,7 +17,7 @@ class Object
 public:
 	virtual bool intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData) = 0;
 
-	virtual void getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords) = 0;
+	virtual void getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords, Material & material) = 0;
 
 	Material & getMaterial();
 

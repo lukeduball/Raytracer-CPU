@@ -7,6 +7,8 @@ class Material
 public:
 	enum class Type { DIFFUSE, REFLECT, REFLECT_AND_REFRACT };
 
+	Material();
+
 	Type getMaterialType() const;
 	glm::vec3 getAlbedo() const;
 	int32_t getTextureID() const;

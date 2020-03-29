@@ -1,10 +1,13 @@
 #pragma once
 
+#include <string>
+
 struct Texture2D
 {
 	unsigned char* image;
 	int width;
 	int height;
+	std::string path;
 };
 
 #include <vector>
