@@ -14,6 +14,7 @@
 #include "../Objects/Triangle.h"
 #include "../Objects/Models/Mesh.h"
 #include "../Objects/Models/Model.h"
+#include "../Objects/Entity.h"
 #include "../Renderer/Materials/RefractiveMaterial.h"
 #include "../Renderer/Materials/DiffuseMaterial.h"
 #include "../Renderer/Materials/ReflectMaterial.h"
@@ -73,8 +74,10 @@ int main()
 	//strawModel->setRotation(0.0f, 0.0f, -45.0f);
 	//objectList.push_back(strawModel);
 	//objectList.push_back(new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, "Resources/Models/cylinder.obj", &water));
-	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, "Resources/Models/plane.obj", &marbleFloor));
-	objectList.push_back(new Model(glm::vec3(1.0f, 0.0f, -6.0f), 1.0f, "Resources/Models/multi_mesh.obj", &orangeDiffuse));
+	Model planeModel = Model("Resources/Models/plane.obj");
+	objectList.push_back(new Entity(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, &planeModel, &marbleFloor));
+	Model multiMeshModel = Model("Resources/Models/multi_mesh.obj");
+	objectList.push_back(new Entity(glm::vec3(1.0f, 0.0f, -6.0f), 1.0f, &multiMeshModel, &orangeDiffuse));
 	//objectList.push_back(new Model(glm::vec3(0.0f, 2.0f, -7.0f), 2.0f, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f), "Resources/Models/monkey.obj"));
 
 	std::cout << "Start raytracing scene!" << std::endl;
