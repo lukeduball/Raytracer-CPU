@@ -48,5 +48,5 @@ glm::vec3 ImageLoader::getColorAtTextureUV(int32_t textureID, float u, float v)
 	unsigned char b = pixelOffset[2];
 	unsigned char a = pixelOffset[3];
 
-	return glm::vec3(r, g, b);
+	return glm::vec3(r / 255.0f, g / 255.0f, b / 255.0f);
 }

@@ -50,7 +50,7 @@ int main()
 	std::vector<Light*> lightList;
 	//lightList.push_back(new PointLight(glm::vec3(0.0f, 2.0f, -4.0f), glm::vec3(1.0f, 1.0f, 1.0f), 50));
 	//lightList.push_back(new DirectionalLight(glm::vec3(0, 0, -1), glm::vec3(1, 1, 1), 2));
-	lightList.push_back(new DirectionalLight(glm::vec3(1, -1, -1), glm::vec3(1, 1, 1), 0.01f));
+	lightList.push_back(new DirectionalLight(glm::vec3(1, -1, -1), glm::vec3(1, 1, 1), 2.0f));
 
 	int32_t missing_texture = renderer.getImageLoader().loadTexture("bad_path");
 	int32_t marble_texture = renderer.getImageLoader().loadTexture("Resources/Textures/marble_floor.png");
@@ -74,6 +74,7 @@ int main()
 	//objectList.push_back(strawModel);
 	//objectList.push_back(new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, "Resources/Models/cylinder.obj", &water));
 	objectList.push_back(new Model(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, "Resources/Models/plane.obj", &marbleFloor));
+	objectList.push_back(new Model(glm::vec3(1.0f, 0.0f, -6.0f), 1.0f, "Resources/Models/multi_mesh.obj", &orangeDiffuse));
 	//objectList.push_back(new Model(glm::vec3(0.0f, 2.0f, -7.0f), 2.0f, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f), "Resources/Models/monkey.obj"));
 
 	std::cout << "Start raytracing scene!" << std::endl;
