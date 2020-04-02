@@ -5,7 +5,7 @@
 class Material
 {
 public:
-	enum class Type { DIFFUSE, REFLECT, REFLECT_AND_REFRACT };
+	enum class Type { PHONG, REFLECT, REFLECT_AND_REFRACT };
 
 	Material();
 

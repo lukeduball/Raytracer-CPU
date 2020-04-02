@@ -11,7 +11,7 @@ Sphere::Sphere(glm::vec3 pos, float rad, Material * material) : Object(pos, mate
 {
 }
 
-void Sphere::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords, Material & material)
+void Sphere::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords, Material *& material)
 {
 	//Calculate the normal by subtracting the intersection point from the center of the sphere
 	normal = glm::normalize(intersectionPoint - this->position);

@@ -11,6 +11,7 @@
 #include "../Math/MathFunctions.h"
 #include "Materials/Material.h"
 #include "Materials/RefractiveMaterial.h"
+#include "Materials/PhongMaterial.h"
 
 const int Renderer::MAX_RAY_DEPTH = 4;
 
@@ -84,60 +85,74 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 		glm::vec3 intersectionPoint = ray.getOrigin() + (ray.getDirectionVector() * nearestHitParameter);
 		glm::vec3 normal;
 		glm::vec2 textureCoords;
-		Material material;
+		Material * material = nullptr;
 
 		//Outputs the normal and texture coordinates for the object that was intersected
 		nearestHit->getSurfaceData(intersectionPoint, intersectionData, normal, textureCoords, material);
 
-		switch (material.getMaterialType())
+		switch (material->getMaterialType())
 		{
-		case Material::Type::DIFFUSE:
-			glm::vec3 colorAtIntersection = getObjectHitColor(textureCoords, material);
-			//Loop through each light in the scene
-			for (Light* light : lightList)
+			case Material::Type::PHONG:
 			{
-				glm::vec3 lightDirection;
-				glm::vec3 attenuatedLight;
-				float tMaximum;
-				//Output the direction of the light and light data to be used in shading. The tMaximum value is used to determine which t-value to throw away when casting a shadow ray
-				light->getLightDirectionAndIntensity(intersectionPoint, lightDirection, attenuatedLight, tMaximum);
-
-				float t;
-				Object* shadowHit = nullptr;
-				IntersectionData shadowData;
-				//Check if the intersection point is in shadow by casting a shadow ray to the light source
-				bool inShadow = trace(Ray(intersectionPoint, -lightDirection, Ray::Type::SHADOW), objectList, t, shadowHit, tMaximum, shadowData);
-
-				if (!inShadow)
+				glm::vec3 colorAtIntersection = getObjectHitColor(textureCoords, material);
+				PhongMaterial * phongMaterial = (PhongMaterial*)(material);
+				//Loop through each light in the scene
+				for (Light* light : lightList)
 				{
-					//Contribute shading from the light source
-					hitColor += colorAtIntersection / (float)M_PI * attenuatedLight * std::max(0.0f, glm::dot(normal, -lightDirection));
+					glm::vec3 lightDirection;
+					glm::vec3 attenuatedLight;
+					float tMaximum;
+					//Output the direction of the light and light data to be used in shading. The tMaximum value is used to determine which t-value to throw away when casting a shadow ray
+					light->getLightDirectionAndIntensity(intersectionPoint, lightDirection, attenuatedLight, tMaximum);
+
+					float t;
+					Object* shadowHit = nullptr;
+					IntersectionData shadowData;
+					//Check if the intersection point is in shadow by casting a shadow ray to the light source
+					bool inShadow = trace(Ray(intersectionPoint, -lightDirection, Ray::Type::SHADOW), objectList, t, shadowHit, tMaximum, shadowData);
+
+					if (!inShadow)
+					{
+						//Calculate the diffuse component
+						glm::vec3 diffuse = colorAtIntersection * attenuatedLight * std::max(0.0f, glm::dot(normal, -lightDirection));
+						//colorAtIntersection / (float)M_PI * attenuatedLight * std::max(0.0f, glm::dot(normal, -lightDirection));
+
+						glm::vec3 reflectionVector = getReflectionVector(lightDirection, normal);
+						//Calculate the speclar component
+						glm::vec3 specular = attenuatedLight * std::pow(std::max(0.0f, glm::dot(reflectionVector, -ray.getDirectionVector())), phongMaterial->getPowerComponent());
+
+						hitColor += diffuse * phongMaterial->getDiffuseComponent() + specular * phongMaterial->getSpecularComponent();
+					}
 				}
 			}
 			break;
-		case Material::Type::REFLECT:
-			glm::vec3 reflectionDir = getReflectionVector(ray.getDirectionVector(), normal);
-			hitColor += 0.8f * getColorFromRaycast(Ray(intersectionPoint, reflectionDir), objectList, lightList, depth + 1);
-			break;
-		case Material::Type::REFLECT_AND_REFRACT:
-			glm::vec3 reflectionColor(0.0f);
-			glm::vec3 refractionColor(0.0f);
-			//1.3 is the value of water, replace with material value
-			float reflectionMix = computeFresnel(ray.getDirectionVector(), normal, 1.3f);
-			//there is no total interal reflection
-			if (reflectionMix < 1.0f)
+			case Material::Type::REFLECT:
 			{
-				RefractiveMaterial * reflectiveMaterial = (RefractiveMaterial*)(&material);
-				glm::vec3 refractionDirection = getRefractionVector(ray.getDirectionVector(), normal, reflectiveMaterial->getIndexOfRefraction());
-				refractionColor = getColorFromRaycast(Ray(intersectionPoint, refractionDirection), objectList, lightList, depth + 1);
+				glm::vec3 reflectionDir = getReflectionVector(ray.getDirectionVector(), normal);
+				hitColor += 0.8f * getColorFromRaycast(Ray(intersectionPoint, reflectionDir), objectList, lightList, depth + 1);
+				break;
 			}
+			case Material::Type::REFLECT_AND_REFRACT:
+			{
+				glm::vec3 reflectionColor(0.0f);
+				glm::vec3 refractionColor(0.0f);
+				//1.3 is the value of water, replace with material value
+				float reflectionMix = computeFresnel(ray.getDirectionVector(), normal, 1.3f);
+				//there is no total interal reflection
+				if (reflectionMix < 1.0f)
+				{
+					RefractiveMaterial * reflectiveMaterial = (RefractiveMaterial*)(&material);
+					glm::vec3 refractionDirection = getRefractionVector(ray.getDirectionVector(), normal, reflectiveMaterial->getIndexOfRefraction());
+					refractionColor = getColorFromRaycast(Ray(intersectionPoint, refractionDirection), objectList, lightList, depth + 1);
+				}
 
-			glm::vec3 reflectionDirection = getReflectionVector(ray.getDirectionVector(), normal);
-			reflectionColor = getColorFromRaycast(Ray(intersectionPoint, reflectionDirection), objectList, lightList, depth + 1);
-			
-			//Find a mix of the reflection and refraction with a linear interpolation
-			hitColor += reflectionColor * reflectionMix + refractionColor * (1 - reflectionMix);
-			break;
+				glm::vec3 reflectionDirection = getReflectionVector(ray.getDirectionVector(), normal);
+				reflectionColor = getColorFromRaycast(Ray(intersectionPoint, reflectionDirection), objectList, lightList, depth + 1);
+
+				//Find a mix of the reflection and refraction with a linear interpolation
+				hitColor += reflectionColor * reflectionMix + refractionColor * (1 - reflectionMix);
+				break;
+			}
 		}
 		return hitColor;
 	}
@@ -154,7 +169,7 @@ bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & 
 	{
 		//TODO Change this line to work with per-face materials
 		//Allows shadow rays to disregard reflect and refract materials so shadows are not cast when the object should be transparent
-		if (ray.getRayType() == Ray::Type::SHADOW && object->getMaterial().getMaterialType() == Material::Type::REFLECT_AND_REFRACT)
+		if (ray.getRayType() == Ray::Type::SHADOW && object->getMaterial()->getMaterialType() == Material::Type::REFLECT_AND_REFRACT)
 		{
 			continue;
 		}
@@ -173,14 +188,14 @@ bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & 
 	return objectHit != nullptr;
 }
 
-glm::vec3 Renderer::getObjectHitColor(const glm::vec2 & textureCoords, const Material & material)
+glm::vec3 Renderer::getObjectHitColor(const glm::vec2 & textureCoords, const Material * material)
 {
-	if (material.getTextureID() < 0)
+	if (material->getTextureID() < 0)
 	{
-		return material.getAlbedo();
+		return material->getAlbedo();
 	}
 
-	return imageLoader.getColorAtTextureUV(material.getTextureID(), textureCoords.x, textureCoords.y);
+	return imageLoader.getColorAtTextureUV(material->getTextureID(), textureCoords.x, textureCoords.y);
 }
 
 glm::vec3 Renderer::getReflectionVector(const glm::vec3 incidentDirection, const glm::vec3 normal)

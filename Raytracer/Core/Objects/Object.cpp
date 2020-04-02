@@ -1,8 +1,8 @@
 #include "Object.h"
 
-Material & Object::getMaterial()
+Material * Object::getMaterial()
 {
-	return *this->material;
+	return this->material;
 }
 
 Object::Object(glm::vec3 pos, Material* material) : position(pos), material(material) {}

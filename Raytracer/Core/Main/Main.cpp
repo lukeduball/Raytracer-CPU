@@ -16,7 +16,7 @@
 #include "../Objects/Models/Model.h"
 #include "../Objects/Entity.h"
 #include "../Renderer/Materials/RefractiveMaterial.h"
-#include "../Renderer/Materials/DiffuseMaterial.h"
+#include "../Renderer/Materials/PhongMaterial.h"
 #include "../Renderer/Materials/ReflectMaterial.h"
 
 #define _USE_MATH_DEFINES
@@ -57,11 +57,11 @@ int main()
 	int32_t marble_texture = renderer.getImageLoader().loadTexture("Resources/Textures/marble_floor.png");
 
 	std::vector<Object*> objectList;
-	DiffuseMaterial whiteDiffuse = DiffuseMaterial(glm::vec3(1.0f, 1.0f, 1.0f));
-	DiffuseMaterial orangeDiffuse = DiffuseMaterial(glm::vec3(1.0f, 0.5f, 0.0f));
-	DiffuseMaterial greenDiffuse = DiffuseMaterial(glm::vec3(0.0f, 1.0f, 0.0f));
-	DiffuseMaterial missingTextureDiffuse = DiffuseMaterial(missing_texture);
-	DiffuseMaterial marbleFloor = DiffuseMaterial(marble_texture);
+	PhongMaterial whiteDiffuse = PhongMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f, 0.0f);
+	PhongMaterial orangeDiffuse = PhongMaterial(glm::vec3(1.0f, 0.5f, 0.0f), 1.0f, 0.0f, 0.0f);
+	PhongMaterial greenDiffuse = PhongMaterial(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, 0.0f, 0.0f);
+	PhongMaterial missingTextureDiffuse = PhongMaterial(missing_texture, 0.5f, 0.1f, 50.0f);
+	PhongMaterial marbleFloor = PhongMaterial(marble_texture, 1.0f, 0.0f, 0.0f);
 	ReflectMaterial reflect = ReflectMaterial();
 	RefractiveMaterial water = RefractiveMaterial(1.3f);
 	//objectList.push_back(new Sphere(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, &water));

@@ -57,7 +57,7 @@ bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & in
 	return parameter != MathFunctions::T_INFINITY;
 }
 
-void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords, Material & material)
+void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords, Material *& material)
 {
 	//Get the current mesh intersected from the index provided by the intersection data
 	Mesh * mesh = this->model->getMeshList()[intersectionData.meshIndex];
@@ -79,13 +79,13 @@ void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 	}
 
 	//If the underlaying Entity has a material, override all other mesh specific materials with this material
-	if (this->material)
+	if (this->getMaterial())
 	{
 		material = this->getMaterial();
 	}
 	else
 	{
-		material = *face.material;
+		material = face.material;
 	}
 }
 
