@@ -5,14 +5,31 @@
 #include "../Renderer/Materials/Material.h"
 #include "Triangle.h"
 #include "../Math/MathFunctions.h"
+#include "AABB.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 Entity::Entity(glm::vec3 pos, float s, Model * m, Material * material) : Object(pos, material), scale(s), model(m), pitchRotation(0.0f), yawRotation(0.0f), rollRotation(0.0f)
 {
 	this->transformedVerticesList.resize(this->model->getMeshList().size());
+	this->boundingBoxList.resize(this->model->getMeshList().size());
 
 	this->transformModelVertices();
+}
+
+Entity::~Entity()
+{
+	//Delete the dynamically allocted bounding box for the model if it exists
+	if (modelBoundingBox)
+	{
+		delete modelBoundingBox;
+	}
+
+	//Delete the dynamically allocated bound box for each mesh
+	for (uint32_t i = 0; i < this->boundingBoxList.size(); i++)
+	{
+		delete this->boundingBoxList[i];
+	}
 }
 
 void Entity::setRotation(float pitch, float yaw, float roll)
@@ -25,8 +42,24 @@ void Entity::setRotation(float pitch, float yaw, float roll)
 
 bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
 {
+	//Check to make sure the model bounding box exists
+	if (modelBoundingBox)
+	{
+		//Check if the ray intersects with the models bounding box to see if there could be an intersection
+		if (!modelBoundingBox->intersect(ray))
+		{
+			return false;
+		}
+	}
+
 	for (uint32_t j = 0; j < this->model->getMeshList().size(); j++)
 	{
+		//Check to make sure that the ray intersects with the mesh's bounding box
+		if (!this->boundingBoxList[j]->intersect(ray))
+		{
+			continue;
+		}
+
 		Mesh * mesh = this->model->getMeshList()[j];
 		size_t numTriangles = mesh->faces.size();
 		for (uint32_t i = 0; i < numTriangles; i++)
@@ -63,11 +96,20 @@ void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 	Mesh * mesh = this->model->getMeshList()[intersectionData.meshIndex];
 	//Get the vertex data from the index provided by the intersection data
 	Face face = mesh->faces[intersectionData.faceIndex];
-	glm::vec3 vertex1 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[0]];
-	glm::vec3 vertex2 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[1]];
-	glm::vec3 vertex3 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[2]];
-	//Calculate the normal by taking the cross product of the difference of the vertices
-	normal = glm::normalize(glm::cross(vertex2 - vertex1, vertex3 - vertex1));
+
+	if (mesh->normals.size() > 0)
+	{
+		//normal = this->getSmoothNormal(intersectionPoint, face, intersectionData.meshIndex);
+		normal = glm::normalize((mesh->normals[face.indices[0]] + mesh->normals[face.indices[1]] + mesh->normals[face.indices[2]]) / 3.0f);
+	}
+	else
+	{
+		glm::vec3 vertex1 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[0]];
+		glm::vec3 vertex2 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[1]];
+		glm::vec3 vertex3 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[2]];
+		//Calculate the normal by taking the cross product of the difference of the vertices
+		normal = glm::normalize(glm::cross(vertex2 - vertex1, vertex3 - vertex1));
+	}
 
 	if (mesh->textureCoords.size() > 0)
 	{
@@ -89,10 +131,20 @@ void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 	}
 }
 
-glm::vec2 Entity::calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex)
+glm::vec3 Entity::getSmoothNormal(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex)
 {
 	Mesh * mesh = this->model->getMeshList()[meshIndex];
 
+	glm::vec3 barycentricCoords = getBarycentricCoordinatesAtIntersection(intersectionPoint, face, meshIndex);
+
+	glm::vec3 normal1 = mesh->normals[face.indices[0]];
+	glm::vec3 normal2 = mesh->normals[face.indices[1]];
+	glm::vec3 normal3 = mesh->normals[face.indices[2]];
+	return glm::normalize(normal1 * barycentricCoords.x + normal2 * barycentricCoords.y + normal3 * barycentricCoords.z);
+}
+
+glm::vec3 Entity::getBarycentricCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex)
+{
 	//Get the vertex positions for each vertex in the face
 	glm::vec3 vertex1 = this->transformedVerticesList[meshIndex][face.indices[0]];
 	glm::vec3 vertex2 = this->transformedVerticesList[meshIndex][face.indices[1]];
@@ -110,13 +162,22 @@ glm::vec2 Entity::calculateUVCoordinatesAtIntersection(const glm::vec3 & interse
 	float area2Ratio = glm::length(glm::cross(v3ToPointVector, v1ToPointVector)) / area;
 	float area3Ratio = glm::length(glm::cross(v1ToPointVector, v2ToPointVector)) / area;
 
+	return glm::vec3(area1Ratio, area2Ratio, area3Ratio);
+}
+
+glm::vec2 Entity::calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex)
+{
+	Mesh * mesh = this->model->getMeshList()[meshIndex];
+
+	glm::vec3 barycentricCoords = getBarycentricCoordinatesAtIntersection(intersectionPoint, face, meshIndex);
+
 	//Get the UV coordinates at each of the vertices
 	glm::vec2 v1UVCoords = mesh->textureCoords[face.indices[0]];
 	glm::vec2 v2UVCoords = mesh->textureCoords[face.indices[1]];
 	glm::vec2 v3UVCoords = mesh->textureCoords[face.indices[2]];
 
 	//Interpolate each UV coordinate from the 3 vertices using the area ratios calculated from the subtriangles
-	return v1UVCoords * area1Ratio + v2UVCoords * area2Ratio + v3UVCoords * area3Ratio;
+	return v1UVCoords * barycentricCoords.x + v2UVCoords * barycentricCoords.y + v3UVCoords * barycentricCoords.z;
 }
 
 void Entity::transformModelVertices()
@@ -127,6 +188,9 @@ void Entity::transformModelVertices()
 	transformMatrix = glm::rotate(transformMatrix, glm::radians(yawRotation), glm::vec3(0, 1, 0));
 	transformMatrix = glm::rotate(transformMatrix, glm::radians(rollRotation), glm::vec3(0, 0, 1));
 	transformMatrix = glm::scale(transformMatrix, glm::vec3(scale));
+
+	std::vector<glm::vec3> bbPointList;
+
 	for (uint32_t j = 0; j < this->model->getMeshList().size(); j++)
 	{
 		Mesh * mesh = this->model->getMeshList()[j];
@@ -136,5 +200,38 @@ void Entity::transformModelVertices()
 			//Transform the vertices by using the transform matrix multiplied by the meshes vertex data
 			this->transformedVerticesList[j][i] = transformMatrix * glm::vec4(mesh->vertices[i], 1.0f);
 		}
+
+		this->boundingBoxList[j] = calculateBoundingBox(this->transformedVerticesList[j]);
+		bbPointList.push_back(this->boundingBoxList[j]->getMinAsPoint());
+		bbPointList.push_back(this->boundingBoxList[j]->getMaxAsPoint());
 	}
+
+	//Only create a model bounding box mesh if there is more than one mesh in the model
+	if (this->boundingBoxList.size() > 1)
+	{
+		this->modelBoundingBox = this->calculateBoundingBox(bbPointList);
+	}
+}
+
+AABB * Entity::calculateBoundingBox(const std::vector<glm::vec3> & pointList)
+{
+	glm::vec3 firstVert = pointList[0];
+	float minX = firstVert.x, maxX = firstVert.x;
+	float minY = firstVert.y, maxY = firstVert.y;
+	float minZ = firstVert.z, maxZ = firstVert.z;
+
+	for (uint32_t i = 1; i < pointList.size(); i++)
+	{
+		glm::vec3 vert = pointList[i];
+		minX = std::min(minX, vert.x);
+		maxX = std::max(maxX, vert.x);
+
+		minY = std::min(minY, vert.y);
+		maxY = std::max(maxY, vert.y);
+
+		minZ = std::min(minZ, vert.z);
+		maxZ = std::max(maxZ, vert.z);
+	}
+
+	return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
 }

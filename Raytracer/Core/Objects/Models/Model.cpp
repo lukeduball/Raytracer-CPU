@@ -73,6 +73,16 @@ Mesh * Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		position.z = mesh->mVertices[i].z;
 		result->vertices.push_back(position);
 
+		//Check if the mesh contains vertex normals
+		if (mesh->mNormals)
+		{
+			glm::vec3 normal;
+			normal.x = mesh->mNormals[i].x;
+			normal.y = mesh->mNormals[i].y;
+			normal.z = mesh->mNormals[i].z;
+			result->normals.push_back(normal);
+		}
+
 		//Check if the mesh contains texture coordinates
 		if (mesh->mTextureCoords[0])
 		{
@@ -91,8 +101,6 @@ Mesh * Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		{
 			resultFace.indices[j] = face.mIndices[j];
 		}
-
-		//Load materials, normals, and texture coordinates
 
 		result->faces.push_back(resultFace);
 	}

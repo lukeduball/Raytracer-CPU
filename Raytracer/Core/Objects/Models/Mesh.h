@@ -7,6 +7,7 @@
 #include <assimp/scene.h>
 
 class Material;
+class AABB;
 
 struct Face
 {

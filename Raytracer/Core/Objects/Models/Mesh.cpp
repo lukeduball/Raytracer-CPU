@@ -1,4 +1,9 @@
 #include "Mesh.h"
 
-Mesh::Mesh() {}
+#include "../AABB.h"
+
+Mesh::Mesh() 
+{
+
+}
 

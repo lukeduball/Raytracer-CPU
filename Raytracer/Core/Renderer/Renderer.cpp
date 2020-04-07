@@ -60,7 +60,7 @@ std::vector<glm::vec3>& Renderer::getFramebuffer()
 glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& objectList, std::vector<Light*>& lightList, const uint32_t & depth)
 {
 	//Background color which will be returned if the ray hits no objects or the depth limit is reached
-	glm::vec3 backgroundColor = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 backgroundColor = glm::vec3(0.0f, 0.0f, 0.2f);
 
 	//Background color is specified, if there is no hit in the trace, the background color will be provided
 	glm::vec3 hitColor = glm::vec3(0.0f, 0.0f, 0.0f);

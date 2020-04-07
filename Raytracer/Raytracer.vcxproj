@@ -131,6 +131,7 @@
   <ItemGroup>
     <ClCompile Include="Core\Main\Main.cpp" />
     <ClCompile Include="Core\Math\MathFunctions.cpp" />
+    <ClCompile Include="Core\Objects\AABB.cpp" />
     <ClCompile Include="Core\Objects\Entity.cpp" />
     <ClCompile Include="Core\Objects\Models\Mesh.cpp" />
     <ClCompile Include="Core\Objects\Models\Model.cpp" />
@@ -152,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Math\MathFunctions.h" />
+    <ClInclude Include="Core\Objects\AABB.h" />
     <ClInclude Include="Core\Objects\Entity.h" />
     <ClInclude Include="Core\Objects\Models\Mesh.h" />
     <ClInclude Include="Core\Objects\Models\Model.h" />
