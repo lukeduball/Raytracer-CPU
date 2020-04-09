@@ -5,7 +5,7 @@
 class RefractiveMaterial : public Material
 {
 public:
-	RefractiveMaterial(float ior);
+	RefractiveMaterial(float ior, bool smooth = false);
 
 	float getIndexOfRefraction();
 

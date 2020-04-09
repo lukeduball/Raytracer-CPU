@@ -5,8 +5,8 @@
 class PhongMaterial : public Material
 {
 public:
-	PhongMaterial(glm::vec3 color, float d, float s, float p);
-	PhongMaterial(int32_t texID, float d, float s, float p);
+	PhongMaterial(glm::vec3 color, float d, float s, float p, bool smooth = false);
+	PhongMaterial(int32_t texID, float d, float s, float p, bool smooth = false);
 
 	float getPowerComponent();
 	float getSpecularComponent();

@@ -5,5 +5,5 @@
 class ReflectMaterial : public Material
 {
 public:
-	ReflectMaterial();
+	ReflectMaterial(bool smooth = false);
 };

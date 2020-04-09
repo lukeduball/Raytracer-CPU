@@ -97,10 +97,26 @@ void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 	//Get the vertex data from the index provided by the intersection data
 	Face face = mesh->faces[intersectionData.faceIndex];
 
+	//If the underlaying Entity has a material, override all other mesh specific materials with this material
+	if (this->getMaterial())
+	{
+		material = this->getMaterial();
+	}
+	else
+	{
+		material = face.material;
+	}
+
 	if (mesh->normals.size() > 0)
 	{
-		//normal = this->getSmoothNormal(intersectionPoint, face, intersectionData.meshIndex);
-		normal = glm::normalize((mesh->normals[face.indices[0]] + mesh->normals[face.indices[1]] + mesh->normals[face.indices[2]]) / 3.0f);
+		if (material->isSmoothShading())
+		{
+			normal = this->getSmoothNormal(intersectionPoint, face, intersectionData.meshIndex);
+		}
+		else
+		{
+			normal = glm::normalize((mesh->normals[face.indices[0]] + mesh->normals[face.indices[1]] + mesh->normals[face.indices[2]]) / 3.0f);
+		}
 	}
 	else
 	{
@@ -118,16 +134,6 @@ void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 	else
 	{
 		textureCoords = glm::vec2(0, 0);
-	}
-
-	//If the underlaying Entity has a material, override all other mesh specific materials with this material
-	if (this->getMaterial())
-	{
-		material = this->getMaterial();
-	}
-	else
-	{
-		material = face.material;
 	}
 }
 

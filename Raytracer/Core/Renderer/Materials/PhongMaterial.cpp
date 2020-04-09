@@ -1,10 +1,10 @@
 #include "PhongMaterial.h"
 
-PhongMaterial::PhongMaterial(glm::vec3 color, float d, float s, float p) : Material(Type::PHONG, color), diffuseComponent(d), specularComponent(s), powerComponent(p)
+PhongMaterial::PhongMaterial(glm::vec3 color, float d, float s, float p, bool smooth) : Material(Type::PHONG, color, smooth), diffuseComponent(d), specularComponent(s), powerComponent(p)
 {
 }
 
-PhongMaterial::PhongMaterial(int32_t texID, float d, float s, float p) : Material(Type::PHONG, texID), diffuseComponent(d), specularComponent(s), powerComponent(p)
+PhongMaterial::PhongMaterial(int32_t texID, float d, float s, float p, bool smooth) : Material(Type::PHONG, texID, smooth), diffuseComponent(d), specularComponent(s), powerComponent(p)
 {
 }
 
