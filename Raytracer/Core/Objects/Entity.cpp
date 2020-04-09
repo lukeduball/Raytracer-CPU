@@ -14,7 +14,7 @@ Entity::Entity(glm::vec3 pos, float s, Model * m, Material * material) : Object(
 	this->transformedVerticesList.resize(this->model->getMeshList().size());
 	this->boundingBoxList.resize(this->model->getMeshList().size());
 
-	this->transformModelVertices();
+	this->transformModelVerticesAndCalculateBoundingBox();
 }
 
 Entity::~Entity()
@@ -37,7 +37,7 @@ void Entity::setRotation(float pitch, float yaw, float roll)
 	this->pitchRotation = pitch;
 	this->yawRotation = yaw;
 	this->rollRotation = roll;
-	this->transformModelVertices();
+	this->transformModelVerticesAndCalculateBoundingBox();
 }
 
 bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
@@ -186,8 +186,9 @@ glm::vec2 Entity::calculateUVCoordinatesAtIntersection(const glm::vec3 & interse
 	return v1UVCoords * barycentricCoords.x + v2UVCoords * barycentricCoords.y + v3UVCoords * barycentricCoords.z;
 }
 
-void Entity::transformModelVertices()
+void Entity::transformModelVerticesAndCalculateBoundingBox()
 {
+	//Calculate the transformation matrix to move each vertice to its position in world space
 	glm::mat4 transformMatrix = glm::mat4(1.0f);
 	transformMatrix = glm::translate(transformMatrix, position);
 	transformMatrix = glm::rotate(transformMatrix, glm::radians(pitchRotation), glm::vec3(1, 0, 0));
@@ -207,7 +208,9 @@ void Entity::transformModelVertices()
 			this->transformedVerticesList[j][i] = transformMatrix * glm::vec4(mesh->vertices[i], 1.0f);
 		}
 
+		//Calculate the bounding box for the transformed mesh
 		this->boundingBoxList[j] = calculateBoundingBox(this->transformedVerticesList[j]);
+		//Put the bounding box's min and max vertices in a list so that the model bounding box can be calculated
 		bbPointList.push_back(this->boundingBoxList[j]->getMinAsPoint());
 		bbPointList.push_back(this->boundingBoxList[j]->getMaxAsPoint());
 	}
