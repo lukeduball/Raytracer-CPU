@@ -39,6 +39,6 @@ private:
 	glm::vec3 getBarycentricCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex);
 	glm::vec2 calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex);
 
-	void transformModelVertices();
+	void transformModelVerticesAndCalculateBoundingBox();
 	AABB * calculateBoundingBox(const std::vector<glm::vec3> & pointList);
 };
