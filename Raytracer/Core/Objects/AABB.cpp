@@ -4,22 +4,29 @@
 
 #include <algorithm>
 
-AABB::AABB(float miX, float miY, float miZ, float maX, float maY, float maZ) : minX(miX), minY(miY), minZ(miZ), maxX(maX), maxY(maY), maxZ(maZ)
+AABB::AABB(float miX, float miY, float miZ, float maX, float maY, float maZ) : AABB(glm::vec3( (miX+maX) / 2.0f, (miY+maY) / 2.0f, (miZ + maZ) / 2.0f), glm::vec3((maX - miX) / 2.0f, (maY - miY) / 2.0f, (maZ - miZ) / 2.0f))
+{
+}
+
+AABB::AABB(glm::vec3 c, glm::vec3 hDist) : center(c), halfDistances(hDist)
 {
 }
 
 bool AABB::intersect(const Ray & ray)
 {
-	float tmin = (minX - ray.getOrigin().x) / ray.getDirectionVector().x;
-	float tmax = (maxX - ray.getOrigin().x) / ray.getDirectionVector().x;
+	glm::vec3 min = getMinAsPoint();
+	glm::vec3 max = getMaxAsPoint();
+
+	float tmin = (min.x - ray.getOrigin().x) / ray.getDirectionVector().x;
+	float tmax = (max.x - ray.getOrigin().x) / ray.getDirectionVector().x;
 
 	if (tmin > tmax)
 	{
 		std::swap(tmin, tmax);
 	}
 
-	float tymin = (minY - ray.getOrigin().y) / ray.getDirectionVector().y;
-	float tymax = (maxY - ray.getOrigin().y) / ray.getDirectionVector().y;
+	float tymin = (min.y - ray.getOrigin().y) / ray.getDirectionVector().y;
+	float tymax = (max.y - ray.getOrigin().y) / ray.getDirectionVector().y;
 
 	if (tymin > tymax)
 	{
@@ -41,8 +48,8 @@ bool AABB::intersect(const Ray & ray)
 		tmax = tymax;
 	}
 
-	float tzmin = (minZ - ray.getOrigin().z) / ray.getDirectionVector().z;
-	float tzmax = (maxZ - ray.getOrigin().z) / ray.getDirectionVector().z;
+	float tzmin = (min.z - ray.getOrigin().z) / ray.getDirectionVector().z;
+	float tzmax = (max.z - ray.getOrigin().z) / ray.getDirectionVector().z;
 
 	if (tzmin > tzmax)
 	{
@@ -59,12 +66,12 @@ bool AABB::intersect(const Ray & ray)
 
 glm::vec3 AABB::getMinAsPoint()
 {
-	return glm::vec3(minX, minY, minZ);
+	return center - halfDistances;
 }
 
 glm::vec3 AABB::getMaxAsPoint()
 {
-	return glm::vec3(maxX, maxY, maxZ);
+	return center + halfDistances;
 }
 
 AABB * AABB::calculateBoundingBox(const std::vector<glm::vec3> & pointList)

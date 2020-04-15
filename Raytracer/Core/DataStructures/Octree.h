@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "../Objects/AABB.h"
+
 class OctreeNode
 {
 public:
@@ -30,6 +32,9 @@ class Octree
 {
 private:
 	OctreeNode * root;
+	uint32_t minObjects;
+	uint32_t minSize;
 
 public:
+	Octree(uint32_t mObjects, uint32_t mSize) : minObjects(mObjects), minSize(mSize) {}
 };

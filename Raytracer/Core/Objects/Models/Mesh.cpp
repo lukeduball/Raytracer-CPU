@@ -1,6 +1,7 @@
 #include "Mesh.h"
 
 #include "../AABB.h"
+#include "../../DataStructures/Octree.h"
 
 Mesh::Mesh() 
 {

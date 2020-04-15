@@ -9,6 +9,9 @@
 class Material;
 class AABB;
 
+template<typename T>
+class Octree;
+
 struct Face
 {
 	uint32_t indices[3];
@@ -26,4 +29,5 @@ public:
 	std::vector<glm::vec2> textureCoords;
 	std::vector<glm::vec3> normals;
 	AABB* boundingBox;
+	Octree<uint32_t> * boundingOctree;
 };
