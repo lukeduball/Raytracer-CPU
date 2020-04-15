@@ -152,6 +152,7 @@
     <ClCompile Include="Core\Objects\Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Core\DataStructures\Octree.h" />
     <ClInclude Include="Core\Math\MathFunctions.h" />
     <ClInclude Include="Core\Objects\AABB.h" />
     <ClInclude Include="Core\Objects\Entity.h" />

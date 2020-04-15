@@ -4,6 +4,7 @@
 #include "../Triangle.h"
 #include "../../Math/MathFunctions.h"
 #include "../../Renderer/Materials/Material.h"
+#include "../AABB.h"
 
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -38,11 +39,21 @@ Model::~Model()
 	{
 		delete this->meshList[i];
 	}
+
+	if (this->modelBoundingBox)
+	{
+		delete this->modelBoundingBox;
+	}
 }
 
 std::vector<Mesh*>& Model::getMeshList()
 {
 	return this->meshList;
+}
+
+AABB * Model::getModelBoundingBox()
+{
+	return this->modelBoundingBox;
 }
 
 void Model::processNode(aiNode * node, const aiScene * scene)
@@ -105,5 +116,24 @@ Mesh * Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		result->faces.push_back(resultFace);
 	}
 
+	result->boundingBox = AABB::calculateBoundingBox(result->vertices);
+
 	return result;
+}
+
+void Model::calculateModelBoundingBox()
+{
+	if (meshList.size() <= 1)
+	{
+		return;
+	}
+
+	std::vector<glm::vec3> pointsList;
+	for (Mesh * mesh : this->meshList)
+	{
+		pointsList.push_back(mesh->boundingBox->getMinAsPoint());
+		pointsList.push_back(mesh->boundingBox->getMaxAsPoint());
+	}
+
+	this->modelBoundingBox = AABB::calculateBoundingBox(pointsList);
 }

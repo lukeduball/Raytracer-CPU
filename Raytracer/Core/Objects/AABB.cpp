@@ -2,6 +2,8 @@
 
 #include "../Renderer/Ray.h"
 
+#include <algorithm>
+
 AABB::AABB(float miX, float miY, float miZ, float maX, float maY, float maZ) : minX(miX), minY(miY), minZ(miZ), maxX(maX), maxY(maY), maxZ(maZ)
 {
 }
@@ -63,4 +65,27 @@ glm::vec3 AABB::getMinAsPoint()
 glm::vec3 AABB::getMaxAsPoint()
 {
 	return glm::vec3(maxX, maxY, maxZ);
+}
+
+AABB * AABB::calculateBoundingBox(const std::vector<glm::vec3> & pointList)
+{
+	glm::vec3 firstVert = pointList[0];
+	float minX = firstVert.x, maxX = firstVert.x;
+	float minY = firstVert.y, maxY = firstVert.y;
+	float minZ = firstVert.z, maxZ = firstVert.z;
+
+	for (uint32_t i = 1; i < pointList.size(); i++)
+	{
+		glm::vec3 vert = pointList[i];
+		minX = std::min(minX, vert.x);
+		maxX = std::max(maxX, vert.x);
+
+		minY = std::min(minY, vert.y);
+		maxY = std::max(maxY, vert.y);
+
+		minZ = std::min(minZ, vert.z);
+		maxZ = std::max(maxZ, vert.z);
+	}
+
+	return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
 }

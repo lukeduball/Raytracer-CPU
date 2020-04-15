@@ -20,8 +20,10 @@ class Mesh
 {
 public:
 	Mesh();
+	~Mesh();
 	std::vector<Face> faces;
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> textureCoords;
 	std::vector<glm::vec3> normals;
+	AABB* boundingBox;
 };

@@ -6,30 +6,13 @@
 #include "Triangle.h"
 #include "../Math/MathFunctions.h"
 #include "AABB.h"
+#include "../Renderer/Ray.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
 Entity::Entity(glm::vec3 pos, float s, Model * m, Material * material) : Object(pos, material), scale(s), model(m), pitchRotation(0.0f), yawRotation(0.0f), rollRotation(0.0f)
 {
-	this->transformedVerticesList.resize(this->model->getMeshList().size());
-	this->boundingBoxList.resize(this->model->getMeshList().size());
-
-	this->transformModelVerticesAndCalculateBoundingBox();
-}
-
-Entity::~Entity()
-{
-	//Delete the dynamically allocted bounding box for the model if it exists
-	if (modelBoundingBox)
-	{
-		delete modelBoundingBox;
-	}
-
-	//Delete the dynamically allocated bound box for each mesh
-	for (uint32_t i = 0; i < this->boundingBoxList.size(); i++)
-	{
-		delete this->boundingBoxList[i];
-	}
+	this->calculateTransformationMatrices();
 }
 
 void Entity::setRotation(float pitch, float yaw, float roll)
@@ -37,16 +20,18 @@ void Entity::setRotation(float pitch, float yaw, float roll)
 	this->pitchRotation = pitch;
 	this->yawRotation = yaw;
 	this->rollRotation = roll;
-	this->transformModelVerticesAndCalculateBoundingBox();
+	this->calculateTransformationMatrices();
 }
 
 bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
 {
+	Ray localRay = Ray::convertToNewSpace(ray, this->worldToLocalMatrix);
+
 	//Check to make sure the model bounding box exists
-	if (modelBoundingBox)
+	if (model->getModelBoundingBox())
 	{
 		//Check if the ray intersects with the models bounding box to see if there could be an intersection
-		if (!modelBoundingBox->intersect(ray))
+		if (model->getModelBoundingBox()->intersect(localRay))
 		{
 			return false;
 		}
@@ -54,13 +39,15 @@ bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & in
 
 	for (uint32_t j = 0; j < this->model->getMeshList().size(); j++)
 	{
+		Mesh * mesh = this->model->getMeshList()[j];
+
+
 		//Check to make sure that the ray intersects with the mesh's bounding box
-		if (!this->boundingBoxList[j]->intersect(ray))
+		if (!mesh->boundingBox->intersect(localRay))
 		{
 			continue;
 		}
 
-		Mesh * mesh = this->model->getMeshList()[j];
 		size_t numTriangles = mesh->faces.size();
 		for (uint32_t i = 0; i < numTriangles; i++)
 		{
@@ -70,13 +57,13 @@ bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & in
 			uint32_t vertex3Index = face.indices[2];
 
 			//Get the vertex data for the data at the given indices
-			glm::vec3 & vertex1 = this->transformedVerticesList[j][vertex1Index];
-			glm::vec3 & vertex2 = this->transformedVerticesList[j][vertex2Index];
-			glm::vec3 & vertex3 = this->transformedVerticesList[j][vertex3Index];
+			glm::vec3 & vertex1 = mesh->vertices[vertex1Index];
+			glm::vec3 & vertex2 = mesh->vertices[vertex2Index];
+			glm::vec3 & vertex3 = mesh->vertices[vertex3Index];
 
 			float rayParameter = MathFunctions::T_INFINITY;
 			//Check the triangle for intersection, do not accept an intersection if the rayParameter is zero because the intersection is with the same face and check it is the nearest intersection
-			if (Triangle::intersectTriangle(ray, vertex1, vertex2, vertex3, rayParameter) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < parameter)
+			if (Triangle::intersectTriangle(localRay, vertex1, vertex2, vertex3, rayParameter) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < parameter)
 			{
 				parameter = rayParameter;
 				//Capture the index number of the triangle for use in normal calculation later
@@ -86,8 +73,15 @@ bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & in
 			}
 		}
 	}
+
+	if (parameter != MathFunctions::T_INFINITY)
+	{
+		parameter = this->convertLocalParameterToWorldParameter(localRay, parameter, ray);
+		return true;
+	}
+
 	//If the paramter is equal to Infinity, the ray did not intersect the model
-	return parameter != MathFunctions::T_INFINITY;
+	return false;
 }
 
 void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const IntersectionData & intersectionData, glm::vec3 & normal, glm::vec2 & textureCoords, Material *& material)
@@ -96,6 +90,9 @@ void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 	Mesh * mesh = this->model->getMeshList()[intersectionData.meshIndex];
 	//Get the vertex data from the index provided by the intersection data
 	Face face = mesh->faces[intersectionData.faceIndex];
+
+	//Convert the intersection point to local coordinates so that per mesh data can be used
+	glm::vec3 localIntersectionPoint = this->worldToLocalMatrix * glm::vec4(intersectionPoint, 1.0f);
 
 	//If the underlaying Entity has a material, override all other mesh specific materials with this material
 	if (this->getMaterial())
@@ -107,34 +104,44 @@ void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 		material = face.material;
 	}
 
+	glm::vec3 localNormal;
 	if (mesh->normals.size() > 0)
 	{
 		if (material->isSmoothShading())
 		{
-			normal = this->getSmoothNormal(intersectionPoint, face, intersectionData.meshIndex);
+			localNormal = this->getSmoothNormal(localIntersectionPoint, face, intersectionData.meshIndex);
 		}
 		else
 		{
-			normal = glm::normalize((mesh->normals[face.indices[0]] + mesh->normals[face.indices[1]] + mesh->normals[face.indices[2]]) / 3.0f);
+			localNormal = (mesh->normals[face.indices[0]] + mesh->normals[face.indices[1]] + mesh->normals[face.indices[2]]) / 3.0f;
 		}
 	}
 	else
 	{
-		glm::vec3 vertex1 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[0]];
-		glm::vec3 vertex2 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[1]];
-		glm::vec3 vertex3 = this->transformedVerticesList[intersectionData.meshIndex][face.indices[2]];
+		glm::vec3 vertex1 = mesh->vertices[face.indices[0]];
+		glm::vec3 vertex2 = mesh->vertices[face.indices[1]];
+		glm::vec3 vertex3 = mesh->vertices[face.indices[2]];
 		//Calculate the normal by taking the cross product of the difference of the vertices
-		normal = glm::normalize(glm::cross(vertex2 - vertex1, vertex3 - vertex1));
+		localNormal = glm::cross(vertex2 - vertex1, vertex3 - vertex1);
 	}
+
+	normal = glm::normalize(localToWorldMatrix * glm::vec4(localNormal, 0.0f));
 
 	if (mesh->textureCoords.size() > 0)
 	{
-		textureCoords = calculateUVCoordinatesAtIntersection(intersectionPoint, face, intersectionData.meshIndex);
+		textureCoords = calculateUVCoordinatesAtIntersection(localIntersectionPoint, face, intersectionData.meshIndex);
 	}
 	else
 	{
 		textureCoords = glm::vec2(0, 0);
 	}
+}
+
+float Entity::convertLocalParameterToWorldParameter(const Ray & localRay, float localParameter, const Ray & worldRay)
+{
+	glm::vec3 localIntersection = localRay.getOrigin() + localRay.getDirectionVector() * localParameter;
+	glm::vec3 globalIntersection = this->localToWorldMatrix * glm::vec4(localIntersection, 1.0f);
+	return (globalIntersection - worldRay.getOrigin()).x / worldRay.getDirectionVector().x;
 }
 
 glm::vec3 Entity::getSmoothNormal(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex)
@@ -146,15 +153,17 @@ glm::vec3 Entity::getSmoothNormal(const glm::vec3 & intersectionPoint, const Fac
 	glm::vec3 normal1 = mesh->normals[face.indices[0]];
 	glm::vec3 normal2 = mesh->normals[face.indices[1]];
 	glm::vec3 normal3 = mesh->normals[face.indices[2]];
-	return glm::normalize(normal1 * barycentricCoords.x + normal2 * barycentricCoords.y + normal3 * barycentricCoords.z);
+	return normal1 * barycentricCoords.x + normal2 * barycentricCoords.y + normal3 * barycentricCoords.z;
 }
 
 glm::vec3 Entity::getBarycentricCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex)
 {
+	Mesh * mesh = this->model->getMeshList()[meshIndex];
+
 	//Get the vertex positions for each vertex in the face
-	glm::vec3 vertex1 = this->transformedVerticesList[meshIndex][face.indices[0]];
-	glm::vec3 vertex2 = this->transformedVerticesList[meshIndex][face.indices[1]];
-	glm::vec3 vertex3 = this->transformedVerticesList[meshIndex][face.indices[2]];
+	glm::vec3 vertex1 = mesh->vertices[face.indices[0]];
+	glm::vec3 vertex2 = mesh->vertices[face.indices[1]];
+	glm::vec3 vertex3 = mesh->vertices[face.indices[2]];
 
 	//Calculate the vectors from each vertex to the intersection point
 	glm::vec3 v1ToPointVector = vertex1 - intersectionPoint;
@@ -186,40 +195,18 @@ glm::vec2 Entity::calculateUVCoordinatesAtIntersection(const glm::vec3 & interse
 	return v1UVCoords * barycentricCoords.x + v2UVCoords * barycentricCoords.y + v3UVCoords * barycentricCoords.z;
 }
 
-void Entity::transformModelVerticesAndCalculateBoundingBox()
+void Entity::calculateTransformationMatrices()
 {
-	//Calculate the transformation matrix to move each vertice to its position in world space
-	glm::mat4 transformMatrix = glm::mat4(1.0f);
-	transformMatrix = glm::translate(transformMatrix, position);
-	transformMatrix = glm::rotate(transformMatrix, glm::radians(pitchRotation), glm::vec3(1, 0, 0));
-	transformMatrix = glm::rotate(transformMatrix, glm::radians(yawRotation), glm::vec3(0, 1, 0));
-	transformMatrix = glm::rotate(transformMatrix, glm::radians(rollRotation), glm::vec3(0, 0, 1));
-	transformMatrix = glm::scale(transformMatrix, glm::vec3(scale));
+	//Create the local to world matrix by applying position transformation, rotational transformation, and scale transformation
+	this->localToWorldMatrix = glm::mat4(1.0f);
+	this->localToWorldMatrix = glm::translate(this->localToWorldMatrix, position);
+	this->localToWorldMatrix = glm::rotate(this->localToWorldMatrix, glm::radians(pitchRotation), glm::vec3(1, 0, 0));
+	this->localToWorldMatrix = glm::rotate(this->localToWorldMatrix, glm::radians(yawRotation), glm::vec3(0, 1, 0));
+	this->localToWorldMatrix = glm::rotate(this->localToWorldMatrix, glm::radians(rollRotation), glm::vec3(0, 0, 1));
+	this->localToWorldMatrix = glm::scale(this->localToWorldMatrix, glm::vec3(scale));
 
-	std::vector<glm::vec3> bbPointList;
-
-	for (uint32_t j = 0; j < this->model->getMeshList().size(); j++)
-	{
-		Mesh * mesh = this->model->getMeshList()[j];
-		this->transformedVerticesList[j].resize(mesh->vertices.size());
-		for (uint32_t i = 0; i < mesh->vertices.size(); i++)
-		{
-			//Transform the vertices by using the transform matrix multiplied by the meshes vertex data
-			this->transformedVerticesList[j][i] = transformMatrix * glm::vec4(mesh->vertices[i], 1.0f);
-		}
-
-		//Calculate the bounding box for the transformed mesh
-		this->boundingBoxList[j] = calculateBoundingBox(this->transformedVerticesList[j]);
-		//Put the bounding box's min and max vertices in a list so that the model bounding box can be calculated
-		bbPointList.push_back(this->boundingBoxList[j]->getMinAsPoint());
-		bbPointList.push_back(this->boundingBoxList[j]->getMaxAsPoint());
-	}
-
-	//Only create a model bounding box mesh if there is more than one mesh in the model
-	if (this->boundingBoxList.size() > 1)
-	{
-		this->modelBoundingBox = this->calculateBoundingBox(bbPointList);
-	}
+	//Create the world to local matrix by applying the inverse of the local to world matrix
+	this->worldToLocalMatrix = glm::inverse(this->localToWorldMatrix);
 }
 
 AABB * Entity::calculateBoundingBox(const std::vector<glm::vec3> & pointList)

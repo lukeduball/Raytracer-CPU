@@ -7,3 +7,11 @@ Mesh::Mesh()
 
 }
 
+Mesh::~Mesh()
+{
+	if (this->boundingBox)
+	{
+		delete this->boundingBox;
+	}
+}
+

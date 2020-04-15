@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/vec3.hpp>
+#include <glm/matrix.hpp>
 
 class Ray
 {
@@ -12,6 +13,8 @@ public:
 	Type getRayType() const;
 	glm::vec3 getOrigin() const;
 	glm::vec3 getDirectionVector() const;
+
+	static Ray convertToNewSpace(const Ray& ray, const glm::mat4& matrix);
 
 private:
 	Type type;

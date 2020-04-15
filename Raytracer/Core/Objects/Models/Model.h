@@ -14,6 +14,7 @@ public:
 	~Model();
 
 	std::vector<Mesh*> & getMeshList();
+	AABB * getModelBoundingBox();
 
 private:
 	float scale;
@@ -21,8 +22,11 @@ private:
 	float pitchRotation;
 	float rollRotation;
 	std::vector<Mesh*> meshList;
+	AABB* modelBoundingBox;
 
 	void processNode(aiNode * node, const aiScene * scene);
 	Mesh * processMesh(aiMesh *mesh, const aiScene * scene);
+
+	void calculateModelBoundingBox();
 
 };

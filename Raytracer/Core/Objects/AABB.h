@@ -2,6 +2,8 @@
 
 #include <glm/vec3.hpp>
 
+#include <vector>
+
 class Ray;
 
 class AABB
@@ -13,6 +15,8 @@ public:
 
 	glm::vec3 getMinAsPoint();
 	glm::vec3 getMaxAsPoint();
+
+	static AABB * calculateBoundingBox(const std::vector<glm::vec3> & pointsList);
 
 private:
 	float minX, minY, minZ, maxX, maxY, maxZ;
