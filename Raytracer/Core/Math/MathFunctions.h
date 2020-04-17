@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/vec3.hpp>
+#include <list>
 #include <limits>
 
 #define ARE_FLOATS_EQUAL(f1, f2) MathFunctions::areFloatsEqual(f1, f2)

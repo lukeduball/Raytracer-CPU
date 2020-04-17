@@ -18,7 +18,6 @@
 #include "../Renderer/Materials/RefractiveMaterial.h"
 #include "../Renderer/Materials/PhongMaterial.h"
 #include "../Renderer/Materials/ReflectMaterial.h"
-#include "../DataStructures/Octree.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -43,7 +42,6 @@ void cleanup(std::vector<Object*> & objectList, std::vector<Light*> & lightList)
 
 int main()
 {
-	Octree<int> oct;
 	//Initializes the raytracer renderer
 	Renderer renderer(WIDTH, HEIGHT);
 

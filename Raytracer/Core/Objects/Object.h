@@ -5,11 +5,12 @@
 
 class Ray;
 class Material;
+struct Face;
 
 struct IntersectionData
 {
 	uint32_t meshIndex;
-	uint32_t faceIndex;
+	Face * face;
 };
 
 class Object

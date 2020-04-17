@@ -5,6 +5,7 @@
 #include "../../Math/MathFunctions.h"
 #include "../../Renderer/Materials/Material.h"
 #include "../AABB.h"
+#include "../../DataStructures/Octree.h"
 
 #include <glm/matrix.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -116,7 +117,7 @@ Mesh * Model::processMesh(aiMesh * mesh, const aiScene * scene)
 		result->faces.push_back(resultFace);
 	}
 
-	result->boundingBox = AABB::calculateBoundingBox(result->vertices);
+	result->constructOctree();
 
 	return result;
 }
@@ -131,8 +132,8 @@ void Model::calculateModelBoundingBox()
 	std::vector<glm::vec3> pointsList;
 	for (Mesh * mesh : this->meshList)
 	{
-		pointsList.push_back(mesh->boundingBox->getMinAsPoint());
-		pointsList.push_back(mesh->boundingBox->getMaxAsPoint());
+		pointsList.push_back(mesh->boundingOctree->root->boundingBox->getMinAsPoint());
+		pointsList.push_back(mesh->boundingOctree->root->boundingBox->getMaxAsPoint());
 	}
 
 	this->modelBoundingBox = AABB::calculateBoundingBox(pointsList);

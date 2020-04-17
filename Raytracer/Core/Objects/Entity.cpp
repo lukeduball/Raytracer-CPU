@@ -31,7 +31,8 @@ bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & in
 	if (model->getModelBoundingBox())
 	{
 		//Check if the ray intersects with the models bounding box to see if there could be an intersection
-		if (model->getModelBoundingBox()->intersect(localRay))
+		float t = MathFunctions::T_INFINITY;
+		if (model->getModelBoundingBox()->intersect(localRay, t))
 		{
 			return false;
 		}
@@ -43,34 +44,15 @@ bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & in
 
 
 		//Check to make sure that the ray intersects with the mesh's bounding box
-		if (!mesh->boundingBox->intersect(localRay))
+		float t = MathFunctions::T_INFINITY;
+		Face * intersectedFace = nullptr;
+		if (mesh->intersectMesh(localRay, t, intersectedFace) && t < parameter)
 		{
-			continue;
-		}
-
-		size_t numTriangles = mesh->faces.size();
-		for (uint32_t i = 0; i < numTriangles; i++)
-		{
-			Face face = mesh->faces[i];
-			uint32_t vertex1Index = face.indices[0];
-			uint32_t vertex2Index = face.indices[1];
-			uint32_t vertex3Index = face.indices[2];
-
-			//Get the vertex data for the data at the given indices
-			glm::vec3 & vertex1 = mesh->vertices[vertex1Index];
-			glm::vec3 & vertex2 = mesh->vertices[vertex2Index];
-			glm::vec3 & vertex3 = mesh->vertices[vertex3Index];
-
-			float rayParameter = MathFunctions::T_INFINITY;
-			//Check the triangle for intersection, do not accept an intersection if the rayParameter is zero because the intersection is with the same face and check it is the nearest intersection
-			if (Triangle::intersectTriangle(localRay, vertex1, vertex2, vertex3, rayParameter) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < parameter)
-			{
-				parameter = rayParameter;
-				//Capture the index number of the triangle for use in normal calculation later
-				intersectionData.faceIndex = i;
-				//Capture the index of the mesh for use in calculations later
-				intersectionData.meshIndex = j;
-			}
+			parameter = t;
+			//Capture the index number of the triangle for use in normal calculation later
+			intersectionData.face = intersectedFace;
+			//Capture the index of the mesh for use in calculations later
+			intersectionData.meshIndex = j;
 		}
 	}
 
@@ -89,7 +71,7 @@ void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 	//Get the current mesh intersected from the index provided by the intersection data
 	Mesh * mesh = this->model->getMeshList()[intersectionData.meshIndex];
 	//Get the vertex data from the index provided by the intersection data
-	Face face = mesh->faces[intersectionData.faceIndex];
+	Face * face = intersectionData.face;
 
 	//Convert the intersection point to local coordinates so that per mesh data can be used
 	glm::vec3 localIntersectionPoint = this->worldToLocalMatrix * glm::vec4(intersectionPoint, 1.0f);
@@ -101,7 +83,7 @@ void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 	}
 	else
 	{
-		material = face.material;
+		material = face->material;
 	}
 
 	glm::vec3 localNormal;
@@ -113,14 +95,14 @@ void Entity::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 		}
 		else
 		{
-			localNormal = (mesh->normals[face.indices[0]] + mesh->normals[face.indices[1]] + mesh->normals[face.indices[2]]) / 3.0f;
+			localNormal = (mesh->normals[face->indices[0]] + mesh->normals[face->indices[1]] + mesh->normals[face->indices[2]]) / 3.0f;
 		}
 	}
 	else
 	{
-		glm::vec3 vertex1 = mesh->vertices[face.indices[0]];
-		glm::vec3 vertex2 = mesh->vertices[face.indices[1]];
-		glm::vec3 vertex3 = mesh->vertices[face.indices[2]];
+		glm::vec3 vertex1 = mesh->vertices[face->indices[0]];
+		glm::vec3 vertex2 = mesh->vertices[face->indices[1]];
+		glm::vec3 vertex3 = mesh->vertices[face->indices[2]];
 		//Calculate the normal by taking the cross product of the difference of the vertices
 		localNormal = glm::cross(vertex2 - vertex1, vertex3 - vertex1);
 	}
@@ -144,26 +126,26 @@ float Entity::convertLocalParameterToWorldParameter(const Ray & localRay, float 
 	return (globalIntersection - worldRay.getOrigin()).x / worldRay.getDirectionVector().x;
 }
 
-glm::vec3 Entity::getSmoothNormal(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex)
+glm::vec3 Entity::getSmoothNormal(const glm::vec3 & intersectionPoint, const Face * face, const uint32_t & meshIndex)
 {
 	Mesh * mesh = this->model->getMeshList()[meshIndex];
 
 	glm::vec3 barycentricCoords = getBarycentricCoordinatesAtIntersection(intersectionPoint, face, meshIndex);
 
-	glm::vec3 normal1 = mesh->normals[face.indices[0]];
-	glm::vec3 normal2 = mesh->normals[face.indices[1]];
-	glm::vec3 normal3 = mesh->normals[face.indices[2]];
+	glm::vec3 normal1 = mesh->normals[face->indices[0]];
+	glm::vec3 normal2 = mesh->normals[face->indices[1]];
+	glm::vec3 normal3 = mesh->normals[face->indices[2]];
 	return normal1 * barycentricCoords.x + normal2 * barycentricCoords.y + normal3 * barycentricCoords.z;
 }
 
-glm::vec3 Entity::getBarycentricCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex)
+glm::vec3 Entity::getBarycentricCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face * face, const uint32_t & meshIndex)
 {
 	Mesh * mesh = this->model->getMeshList()[meshIndex];
 
 	//Get the vertex positions for each vertex in the face
-	glm::vec3 vertex1 = mesh->vertices[face.indices[0]];
-	glm::vec3 vertex2 = mesh->vertices[face.indices[1]];
-	glm::vec3 vertex3 = mesh->vertices[face.indices[2]];
+	glm::vec3 vertex1 = mesh->vertices[face->indices[0]];
+	glm::vec3 vertex2 = mesh->vertices[face->indices[1]];
+	glm::vec3 vertex3 = mesh->vertices[face->indices[2]];
 
 	//Calculate the vectors from each vertex to the intersection point
 	glm::vec3 v1ToPointVector = vertex1 - intersectionPoint;
@@ -180,16 +162,16 @@ glm::vec3 Entity::getBarycentricCoordinatesAtIntersection(const glm::vec3 & inte
 	return glm::vec3(area1Ratio, area2Ratio, area3Ratio);
 }
 
-glm::vec2 Entity::calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face & face, const uint32_t & meshIndex)
+glm::vec2 Entity::calculateUVCoordinatesAtIntersection(const glm::vec3 & intersectionPoint, const Face * face, const uint32_t & meshIndex)
 {
 	Mesh * mesh = this->model->getMeshList()[meshIndex];
 
 	glm::vec3 barycentricCoords = getBarycentricCoordinatesAtIntersection(intersectionPoint, face, meshIndex);
 
 	//Get the UV coordinates at each of the vertices
-	glm::vec2 v1UVCoords = mesh->textureCoords[face.indices[0]];
-	glm::vec2 v2UVCoords = mesh->textureCoords[face.indices[1]];
-	glm::vec2 v3UVCoords = mesh->textureCoords[face.indices[2]];
+	glm::vec2 v1UVCoords = mesh->textureCoords[face->indices[0]];
+	glm::vec2 v2UVCoords = mesh->textureCoords[face->indices[1]];
+	glm::vec2 v3UVCoords = mesh->textureCoords[face->indices[2]];
 
 	//Interpolate each UV coordinate from the 3 vertices using the area ratios calculated from the subtriangles
 	return v1UVCoords * barycentricCoords.x + v2UVCoords * barycentricCoords.y + v3UVCoords * barycentricCoords.z;
