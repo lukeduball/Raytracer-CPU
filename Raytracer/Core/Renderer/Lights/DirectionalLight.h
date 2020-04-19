@@ -7,7 +7,7 @@ class DirectionalLight : public Light
 public:
 	DirectionalLight(glm::vec3 dir, glm::vec3 c, float i);
 
-	void getLightDirectionAndIntensity(glm::vec3 objectPoint, glm::vec3 & lightDirection, glm::vec3 & attenuatedLight, float & tDistance);
+	void getLightDirectionAndIntensity(const glm::vec3 & objectPoint, glm::vec3 & lightDirection, glm::vec3 & attenuatedLight, float & tDistance);
 
 	glm::vec3 getDirection();
 

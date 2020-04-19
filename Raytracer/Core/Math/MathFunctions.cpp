@@ -5,6 +5,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+constexpr float RADIAN_CONVERSION_FACTOR = (float)M_PI / 180.0f;
+
 //Margin of error used to compare float values
 const float MathFunctions::EPSILON = 0.0001f;
 //Maximum value a float can be, t-value of a parametric equation of a ray when the ray has no intersection
@@ -12,7 +14,7 @@ const float MathFunctions::T_INFINITY = std::numeric_limits<float>::max();
 
 float MathFunctions::degreesToRadians(float degrees)
 {
-	return degrees * (float)M_PI / 180.0f;
+	return degrees * RADIAN_CONVERSION_FACTOR;
 }
 
 float MathFunctions::clamp(float min, float max, float value)

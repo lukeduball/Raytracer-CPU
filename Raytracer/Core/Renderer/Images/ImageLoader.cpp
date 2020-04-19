@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+constexpr float CONVERSION_FACTOR_255 = 0.00392157f;
+
 ImageLoader::ImageLoader()
 {
 	//Load the missing texture image to first to occupy index 0 o the loadedTextures list
@@ -64,5 +66,5 @@ glm::vec3 ImageLoader::getColorAtTextureUV(int32_t textureID, float u, float v)
 	unsigned char b = pixelOffset[2];
 	unsigned char a = pixelOffset[3];
 
-	return glm::vec3(r / 255.0f, g / 255.0f, b / 255.0f);
+	return glm::vec3(r * CONVERSION_FACTOR_255, g * CONVERSION_FACTOR_255, b * CONVERSION_FACTOR_255);
 }

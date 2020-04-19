@@ -7,7 +7,7 @@
 
 PointLight::PointLight(glm::vec3 pos, glm::vec3 c, float i) : position(pos), Light(c, i) {}
 
-void PointLight::getLightDirectionAndIntensity(glm::vec3 objectPoint, glm::vec3 & lightDirection, glm::vec3 & attenuatedLight, float & tDistance)
+void PointLight::getLightDirectionAndIntensity(const glm::vec3 & objectPoint, glm::vec3 & lightDirection, glm::vec3 & attenuatedLight, float & tDistance)
 {
 	//Caluclate the light direction by finding the vector between the object and the lights position
 	lightDirection = objectPoint - this->position;
@@ -19,5 +19,5 @@ void PointLight::getLightDirectionAndIntensity(glm::vec3 objectPoint, glm::vec3 
 	lightDirection = glm::normalize(lightDirection);
 
 	//Calculate the light that reaches the object by using an inverse square falloff
-	attenuatedLight = this->intensity * this->color / (4.f * (float)M_PI * distanceSquared);
+	attenuatedLight = this->intensity * this->color / (4.0f * (float)M_PI * distanceSquared);
 }

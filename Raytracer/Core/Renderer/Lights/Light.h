@@ -7,7 +7,7 @@ class Light
 public:
 	Light(glm::vec3 c, float i);
 
-	virtual void getLightDirectionAndIntensity(glm::vec3 objectPoint, glm::vec3 & lightDirection, glm::vec3 & attenuatedLight, float & tDistance) = 0;
+	virtual void getLightDirectionAndIntensity(const glm::vec3 & objectPoint, glm::vec3 & lightDirection, glm::vec3 & attenuatedLight, float & tDistance) = 0;
 
 	float getIntensity();
 	glm::vec3 getColor();

@@ -42,6 +42,7 @@ bool Entity::possibleIntersection(const Ray & ray, float & parameter)
 			return true;
 		}
 	}
+	return false;
 }
 
 bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
@@ -174,11 +175,11 @@ glm::vec3 Entity::getBarycentricCoordinatesAtIntersection(const glm::vec3 & inte
 	glm::vec3 v3ToPointVector = vertex3 - intersectionPoint;
 
 	//Calculates the area of the triangle
-	float area = glm::length(glm::cross(vertex1 - vertex2, vertex1 - vertex3));
+	float inverseArea = 1 / glm::length(glm::cross(vertex1 - vertex2, vertex1 - vertex3));
 	//Calculate the ratio that each of the sub triangles areas take up
-	float area1Ratio = glm::length(glm::cross(v2ToPointVector, v3ToPointVector)) / area;
-	float area2Ratio = glm::length(glm::cross(v3ToPointVector, v1ToPointVector)) / area;
-	float area3Ratio = glm::length(glm::cross(v1ToPointVector, v2ToPointVector)) / area;
+	float area1Ratio = glm::length(glm::cross(v2ToPointVector, v3ToPointVector)) * inverseArea;
+	float area2Ratio = glm::length(glm::cross(v3ToPointVector, v1ToPointVector)) * inverseArea;
+	float area3Ratio = glm::length(glm::cross(v1ToPointVector, v2ToPointVector)) * inverseArea;
 
 	return glm::vec3(area1Ratio, area2Ratio, area3Ratio);
 }

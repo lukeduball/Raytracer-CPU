@@ -29,13 +29,15 @@ void Renderer::render(Camera & camera, std::vector<Object*>& objectList, std::ve
 	camera.calculateCameraToWorldSpaceMatrix();
 	//Loop through all pixels to send a ray from to render the scene
 	int counter = 0;
+	float inverseWidth = 1 / (float)width;
+	float inverseHeight = 1 / (float)height;
 	for (uint32_t y = 0; y < height; y++)
 	{
 		for (uint32_t x = 0; x < width; x++)
 		{
 			//Calculate the pixel's position in camera space by calculating the location of the center of each pixel. Apply the aspect ratio to the x to get the correct scaling
-			float pX = (1.0f - 2.0f * (x + 0.5f) / (float)width) * scale * aspectRatio;
-			float pY = (1.0f - 2.0f * (y + 0.5f) / (float)height) * scale;
+			float pX = (1.0f - 2.0f * (x + 0.5f) * inverseWidth) * scale * aspectRatio;
+			float pY = (1.0f - 2.0f * (y + 0.5f) * inverseHeight) * scale;
 			//Convert the pixel position to world space placing the plane 1 unit in front of the camera
 			glm::vec3 position = camera.convertCameraSpaceToWorldSpace(glm::vec3(pX, pY, 1));
 			//Create the ray by calculating the direction the ray will be cast in by subtracting the origin of the camera
@@ -167,8 +169,15 @@ bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & 
 	//Loop through all objects to check for possible intersections with the ray
 	for (Object * object : objectList)
 	{
+		//TODO Change this line to work with per-face materials
+		//Allows shadow rays to disregard reflect and refract materials so shadows are not cast when the object should be transparent
+		if (ray.getRayType() == Ray::Type::SHADOW && object->getMaterial()->getMaterialType() == Material::Type::REFLECT_AND_REFRACT)
+		{
+			continue;
+		}
+
 		float t = MathFunctions::T_INFINITY;
-		if (object->possibleIntersection(ray, t))
+		if (object->possibleIntersection(ray, t) && t < upperBound)
 		{
 			//Add the intersection pair with its ray parameter to the list
 			IntersectionPair pair;
@@ -185,7 +194,7 @@ bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & 
 	{
 		//Need to pass a temporary intersection data struct so that intersection data does not get overwritten when an intersection is not the closest intersection point
 		IntersectionData tempData;
-		if (possibleIntersectionList.front().objectHit->intersect(ray, nearestHitParameter, tempData) && !ARE_FLOATS_EQUAL(nearestHitParameter, 0.0f))
+		if (possibleIntersectionList.front().objectHit->intersect(ray, nearestHitParameter, tempData) && !ARE_FLOATS_EQUAL(nearestHitParameter, 0.0f) && nearestHitParameter < upperBound)
 		{
 			objectHit = possibleIntersectionList.front().objectHit;
 			intersectionData = tempData;
@@ -277,5 +286,5 @@ float Renderer::computeFresnel(const glm::vec3 incidentDirection, const glm::vec
 	//calculates the perpendicular fresnel equation
 	float perpendicularFresnel = ((nextMediumIndexOfRefraction*cosineAngleOfRefraction) - (currentMediumIndexOfRefraction*incidentCosine)) / ((nextMediumIndexOfRefraction*cosineAngleOfRefraction) + (currentMediumIndexOfRefraction*incidentCosine));
 	//returns the average of the two equations
-	return (parallelFresnel * parallelFresnel + perpendicularFresnel * perpendicularFresnel) / 2.0f;
+	return (parallelFresnel * parallelFresnel + perpendicularFresnel * perpendicularFresnel) * 0.5f;
 }
