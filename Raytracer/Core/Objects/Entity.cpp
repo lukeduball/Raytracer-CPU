@@ -6,6 +6,7 @@
 #include "../Math/MathFunctions.h"
 #include "../Geometry/AABB.h"
 #include "../Renderer/Ray.h"
+#include "../DataStructures/Octree.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -20,6 +21,27 @@ void Entity::setRotation(float pitch, float yaw, float roll)
 	this->yawRotation = yaw;
 	this->rollRotation = roll;
 	this->calculateTransformationMatrices();
+}
+
+bool Entity::possibleIntersection(const Ray & ray, float & parameter)
+{
+	Ray localRay = Ray::convertToNewSpace(ray, this->worldToLocalMatrix);
+	if (this->model->getModelBoundingBox())
+	{
+		if (this->model->getModelBoundingBox()->intersect(localRay, parameter))
+		{
+			parameter = convertLocalParameterToWorldParameter(localRay, parameter, ray);
+			return true;
+		}
+	}
+	else
+	{
+		if (this->model->getMeshList()[0]->boundingOctree->root->boundingBox->intersect(localRay, parameter))
+		{
+			parameter = convertLocalParameterToWorldParameter(localRay, parameter, ray);
+			return true;
+		}
+	}
 }
 
 bool Entity::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)

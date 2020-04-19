@@ -1,9 +1,8 @@
 #include "Renderer.h"
 
+#include <list>
 #include <algorithm>
 #include <iostream>
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 #include "Camera.h"
 #include "Ray.h"
@@ -164,28 +163,38 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 
 bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & nearestHitParameter, Object *& objectHit, float upperBound, IntersectionData & intersectionData)
 {
-	nearestHitParameter = MathFunctions::T_INFINITY;
+	std::list<IntersectionPair> possibleIntersectionList;
+	//Loop through all objects to check for possible intersections with the ray
 	for (Object * object : objectList)
 	{
-		//TODO Change this line to work with per-face materials
-		//Allows shadow rays to disregard reflect and refract materials so shadows are not cast when the object should be transparent
-		if (ray.getRayType() == Ray::Type::SHADOW && object->getMaterial()->getMaterialType() == Material::Type::REFLECT_AND_REFRACT)
+		float t = MathFunctions::T_INFINITY;
+		if (object->possibleIntersection(ray, t))
 		{
-			continue;
-		}
-		float rayParameter = MathFunctions::T_INFINITY;
-		//Need to pass a temporary intersection data struct so that intersection data does not get overwritten when an intersection is not the closest intersection point
-		IntersectionData tempData;
-		//Checks to see if the ray and object intersect and if this hit is the closest hit, ignore rayParameter that is zero because this indicates that the ray intersects with the same face its being cast from
-		if (object->intersect(ray, rayParameter, tempData) && !ARE_FLOATS_EQUAL(rayParameter, 0.0f) && rayParameter < nearestHitParameter && rayParameter < upperBound)
-		{
-			objectHit = object;
-			nearestHitParameter = rayParameter;
-			intersectionData = tempData;
+			//Add the intersection pair with its ray parameter to the list
+			IntersectionPair pair;
+			pair.objectHit = object;
+			pair.parameter = t;
+			possibleIntersectionList.push_back(pair);
 		}
 	}
+	//Sort the possible intersections by the closest ray parameter
+	possibleIntersectionList.sort();
 
-	return objectHit != nullptr;
+	nearestHitParameter = MathFunctions::T_INFINITY;
+	while (!possibleIntersectionList.empty())
+	{
+		//Need to pass a temporary intersection data struct so that intersection data does not get overwritten when an intersection is not the closest intersection point
+		IntersectionData tempData;
+		if (possibleIntersectionList.front().objectHit->intersect(ray, nearestHitParameter, tempData) && !ARE_FLOATS_EQUAL(nearestHitParameter, 0.0f))
+		{
+			objectHit = possibleIntersectionList.front().objectHit;
+			intersectionData = tempData;
+			return true;
+		}
+		possibleIntersectionList.pop_front();
+	}
+
+	return false;
 }
 
 glm::vec3 Renderer::getObjectHitColor(const glm::vec2 & textureCoords, const Material * material)

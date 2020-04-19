@@ -6,9 +6,21 @@
 #include "../Objects/Object.h"
 #include "Images/ImageLoader.h"
 
+
 class Camera;
 class Light;
 class Ray;
+
+struct IntersectionPair
+{
+	float parameter;
+	Object * objectHit;
+
+	bool operator<(const IntersectionPair &pair)
+	{
+		return this->parameter < pair.parameter;
+	}
+};
 
 class Renderer
 {

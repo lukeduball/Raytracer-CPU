@@ -10,6 +10,11 @@ Triangle::Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, Material * material
 {
 }
 
+bool Triangle::possibleIntersection(const Ray & ray, float & parameter)
+{
+	return intersectTriangle(ray, this->vertex1, this->vertex2, this->vertex3, parameter);
+}
+
 bool Triangle::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
 {
 	return intersectTriangle(ray, this->vertex1, this->vertex2, this->vertex3, parameter);

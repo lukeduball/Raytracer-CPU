@@ -22,7 +22,17 @@ void Sphere::getSurfaceData(const glm::vec3 & intersectionPoint, const Intersect
 	material = this->getMaterial();
 }
 
+bool Sphere::possibleIntersection(const Ray & ray, float & parameter)
+{
+	return intersectSphere(ray, parameter);
+}
+
 bool Sphere::intersect(const Ray & ray, float & parameter, IntersectionData & intersectionData)
+{
+	return intersectSphere(ray, parameter);
+}
+
+bool Sphere::intersectSphere(const Ray & ray, float & parameter)
 {
 	//Find the distance squared between the ray origin and center
 	glm::vec3 rayOriginToSphereCenter = this->position - ray.getOrigin();
