@@ -3,9 +3,8 @@
 #include "Models/Model.h"
 #include "Models/Mesh.h"
 #include "../Renderer/Materials/Material.h"
-#include "Triangle.h"
 #include "../Math/MathFunctions.h"
-#include "AABB.h"
+#include "../Geometry/AABB.h"
 #include "../Renderer/Ray.h"
 
 #include <glm/gtc/matrix_transform.hpp>

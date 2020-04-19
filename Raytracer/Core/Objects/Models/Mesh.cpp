@@ -1,9 +1,9 @@
 #include "Mesh.h"
 
-#include "../AABB.h"
+#include "../../Geometry/AABB.h"
 #include "../../DataStructures/Octree.h"
 #include "../../Math/MathFunctions.h"
-#include "../Triangle.h"
+#include "../../Geometry/Triangle.h"
 
 #include <bitset>
 

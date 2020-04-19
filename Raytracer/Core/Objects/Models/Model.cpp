@@ -1,10 +1,9 @@
 #include "Model.h"
 
 #include "../../Renderer/Ray.h"
-#include "../Triangle.h"
 #include "../../Math/MathFunctions.h"
 #include "../../Renderer/Materials/Material.h"
-#include "../AABB.h"
+#include "../../Geometry/AABB.h"
 #include "../../DataStructures/Octree.h"
 
 #include <glm/matrix.hpp>

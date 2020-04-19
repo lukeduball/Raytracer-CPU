@@ -129,14 +129,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Geometry\AABB.cpp" />
+    <ClCompile Include="Core\Geometry\Sphere.cpp" />
+    <ClCompile Include="Core\Geometry\Triangle.cpp" />
     <ClCompile Include="Core\Main\Main.cpp" />
     <ClCompile Include="Core\Math\MathFunctions.cpp" />
-    <ClCompile Include="Core\Objects\AABB.cpp" />
     <ClCompile Include="Core\Objects\Entity.cpp" />
     <ClCompile Include="Core\Objects\Models\Mesh.cpp" />
     <ClCompile Include="Core\Objects\Models\Model.cpp" />
     <ClCompile Include="Core\Objects\Object.cpp" />
-    <ClCompile Include="Core\Objects\Sphere.cpp" />
     <ClCompile Include="Core\Renderer\Camera.cpp" />
     <ClCompile Include="Core\Renderer\Image.cpp" />
     <ClCompile Include="Core\Renderer\Images\ImageLoader.cpp" />
@@ -149,17 +150,17 @@
     <ClCompile Include="Core\Renderer\Materials\RefractiveMaterial.cpp" />
     <ClCompile Include="Core\Renderer\Ray.cpp" />
     <ClCompile Include="Core\Renderer\Renderer.cpp" />
-    <ClCompile Include="Core\Objects\Triangle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\DataStructures\Octree.h" />
+    <ClInclude Include="Core\Geometry\AABB.h" />
+    <ClInclude Include="Core\Geometry\Sphere.h" />
+    <ClInclude Include="Core\Geometry\Triangle.h" />
     <ClInclude Include="Core\Math\MathFunctions.h" />
-    <ClInclude Include="Core\Objects\AABB.h" />
     <ClInclude Include="Core\Objects\Entity.h" />
     <ClInclude Include="Core\Objects\Models\Mesh.h" />
     <ClInclude Include="Core\Objects\Models\Model.h" />
     <ClInclude Include="Core\Objects\Object.h" />
-    <ClInclude Include="Core\Objects\Sphere.h" />
     <ClInclude Include="Core\Renderer\Camera.h" />
     <ClInclude Include="Core\Renderer\Image.h" />
     <ClInclude Include="Core\Renderer\Images\ImageLoader.h" />
@@ -172,7 +173,6 @@
     <ClInclude Include="Core\Renderer\Materials\RefractiveMaterial.h" />
     <ClInclude Include="Core\Renderer\Ray.h" />
     <ClInclude Include="Core\Renderer\Renderer.h" />
-    <ClInclude Include="Core\Objects\Triangle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

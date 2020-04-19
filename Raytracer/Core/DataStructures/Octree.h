@@ -3,7 +3,7 @@
 #include <vector>
 #include <list>
 
-#include "../Objects/AABB.h"
+#include "../Geometry/AABB.h"
 #include "../Renderer/Ray.h"
 #include "../Math/MathFunctions.h"
 

@@ -5,13 +5,12 @@
 #include <algorithm>
 #include <chrono>
 
-#include "../Objects/Sphere.h"
+#include "../Geometry/Sphere.h"
 #include "../Renderer/Camera.h"
 #include "../Renderer/Image.h"
 #include "../Renderer/Lights/DirectionalLight.h"
 #include "../Renderer/Lights/PointLight.h"
 #include "../Renderer/Renderer.h"
-#include "../Objects/Triangle.h"
 #include "../Objects/Models/Mesh.h"
 #include "../Objects/Models/Model.h"
 #include "../Objects/Entity.h"
