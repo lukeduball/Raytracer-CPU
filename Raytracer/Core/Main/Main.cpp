@@ -50,32 +50,47 @@ int main()
 	std::vector<Light*> lightList;
 	//lightList.push_back(new PointLight(glm::vec3(0.0f, 2.0f, -4.0f), glm::vec3(1.0f, 1.0f, 1.0f), 50));
 	lightList.push_back(new DirectionalLight(glm::vec3(1, -1, -1), glm::vec3(1, 1, 1), 2.0f));
+	lightList.push_back(new PointLight(glm::vec3(1.0f, 1.5f, -9.9f), glm::vec3(1, 1, 1), 50.0f));
 
 	int32_t missing_texture = renderer.getImageLoader().loadTexture("bad_path");
 	int32_t marble_texture = renderer.getImageLoader().loadTexture("Resources/Textures/marble_floor.png");
+	int32_t trex_texture = renderer.getImageLoader().loadTexture("Resources/Textures/T-REX.png");
 
 	std::vector<Object*> objectList;
-	PhongMaterial whiteDiffuse = PhongMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f, 0.0f);
+	PhongMaterial whiteDiffuse = PhongMaterial(glm::vec3(1.0f, 1.0f, 1.0f), 1.0f, 0.0f, 0.0f, true);
 	PhongMaterial orangeDiffuse = PhongMaterial(glm::vec3(1.0f, 0.5f, 0.0f), 1.0f, 0.0f, 0.0f);
 	PhongMaterial greenDiffuse = PhongMaterial(glm::vec3(0.0f, 1.0f, 0.0f), 1.0f, 0.0f, 0.0f);
-	PhongMaterial missingTextureDiffuse = PhongMaterial(missing_texture, 0.5f, 0.1f, 50.0f);
+	PhongMaterial missingTextureDiffuse = PhongMaterial(missing_texture, 0.5f, 0.5f, 50.0f);
 	PhongMaterial marbleFloor = PhongMaterial(marble_texture, 1.0f, 0.0f, 0.0f);
+	PhongMaterial tRex = PhongMaterial(trex_texture, 1.0f, 0.0f, 0.0f, true);
 	ReflectMaterial reflect = ReflectMaterial();
 	RefractiveMaterial water = RefractiveMaterial(1.3f);
-	//objectList.push_back(new Sphere(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, &water));
-	//objectList.push_back(new Triangle(glm::vec3(-1.5f, 0.5f, -5.0f), glm::vec3(0.5f, 1.5f, -7.0f), glm::vec3(0.0f, 2.5f, -7.0f), &orangeDiffuse));
-	//objectList.push_back(new Sphere(glm::vec3(1.0f, 1.0f, -6.0f), 0.35f,  &greenDiffuse));
-	//objectList.push_back(new Sphere(glm::vec3(0.0f, 1.0f, -9.0f), 1.0f, &whiteDiffuse));
-	//objectList.push_back(new Sphere(glm::vec3(1.0f, 0.0f, -6.0f), 0.25f,  &greenDiffuse));
-	objectList.push_back(new Sphere(glm::vec3(-1.5f, 2.0f, -6.0f), 1.0f, &missingTextureDiffuse));
-	//Model * strawModel = new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, "Resources/Models/straw.obj", &greenDiffuse);
-	//strawModel->setRotation(0.0f, 0.0f, -45.0f);
-	//objectList.push_back(strawModel);
-	//objectList.push_back(new Model(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, "Resources/Models/cylinder.obj", &water));
+	
+	objectList.push_back(new Sphere(glm::vec3(-2.5f, 2.0f, -7.0f), 1.0f, &missingTextureDiffuse));
+	
+
+	Model strawModel = Model("Resources/Models/straw.obj");
+	Entity * straw = new Entity(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, &strawModel, &greenDiffuse);
+	straw->setRotation(0.0f, 0.0f, -45.0f);
+	objectList.push_back(straw);
+
+	Model cylinderModel = Model("Resources/Models/cylinder.obj");
+	objectList.push_back(new Entity(glm::vec3(0.0f, 1.0f, -7.0f), 1.0f, &cylinderModel, &water));
+
 	Model planeModel = Model("Resources/Models/plane.obj");
 	objectList.push_back(new Entity(glm::vec3(0.0f, 0.0f, -6.0f), 10.0f, &planeModel, &marbleFloor));
+
+	Entity * reflectPlaneEntity = new Entity(glm::vec3(1.0f, 1.5f, -10.0f), 3.0f, &planeModel, &reflect);
+	reflectPlaneEntity->setRotation(0.0f, 45.0f, 90.0f);
+	objectList.push_back(reflectPlaneEntity);
+
 	Model sphereModel = Model("Resources/Models/uvsphere.obj");
-	objectList.push_back(new Entity(glm::vec3(1.0f, 1.0f, -6.0f), 1.0f, &sphereModel, &whiteDiffuse));
+	objectList.push_back(new Entity(glm::vec3(3.0f, 1.0f, -6.0f), 1.0f, &sphereModel, &whiteDiffuse));
+
+	Model tRexModel = Model("Resources/Models/t-rex.obj");
+	Entity * tRexEntity = new Entity(glm::vec3(0.0f, 1.0f, -8.0f), 1.0f, &tRexModel, &tRex);
+	tRexEntity->setRotation(0.0f, 45.0f, 0.0f);
+	objectList.push_back(tRexEntity);
 
 	std::cout << "Start raytracing scene!" << std::endl;
 	//Stores the clock time at the start of the rendering process

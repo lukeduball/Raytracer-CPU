@@ -61,7 +61,7 @@ std::vector<glm::vec3>& Renderer::getFramebuffer()
 glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& objectList, std::vector<Light*>& lightList, const uint32_t & depth)
 {
 	//Background color which will be returned if the ray hits no objects or the depth limit is reached
-	glm::vec3 backgroundColor = glm::vec3(0.0f, 0.0f, 0.2f);
+	glm::vec3 backgroundColor = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	//Background color is specified, if there is no hit in the trace, the background color will be provided
 	glm::vec3 hitColor = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -73,7 +73,7 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 	}
 
 	//Value used in ray parameterization to calculate the intersection point
-	float nearestHitParameter;
+	float nearestHitParameter = MathFunctions::T_INFINITY;
 	//The reference to the nearest intersected object when the ray is cast
 	Object* nearestHit = nullptr;
 	//Extra data passed back from the intersection object to be used in surface calculations
@@ -135,15 +135,15 @@ glm::vec3 Renderer::getColorFromRaycast(const Ray & ray, std::vector<Object*>& o
 			}
 			case Material::Type::REFLECT_AND_REFRACT:
 			{
+				RefractiveMaterial * refractiveMaterial = (RefractiveMaterial*)(material);
+
 				glm::vec3 reflectionColor(0.0f);
 				glm::vec3 refractionColor(0.0f);
-				//1.3 is the value of water, replace with material value
-				float reflectionMix = computeFresnel(ray.getDirectionVector(), normal, 1.3f);
+				float reflectionMix = computeFresnel(ray.getDirectionVector(), normal, refractiveMaterial->getIndexOfRefraction());
 				//there is no total interal reflection
 				if (reflectionMix < 1.0f)
 				{
-					RefractiveMaterial * reflectiveMaterial = (RefractiveMaterial*)(&material);
-					glm::vec3 refractionDirection = getRefractionVector(ray.getDirectionVector(), normal, reflectiveMaterial->getIndexOfRefraction());
+					glm::vec3 refractionDirection = getRefractionVector(ray.getDirectionVector(), normal, refractiveMaterial->getIndexOfRefraction());
 					refractionColor = getColorFromRaycast(Ray(intersectionPoint, refractionDirection), objectList, lightList, depth + 1);
 				}
 
@@ -189,9 +189,9 @@ bool Renderer::trace(const Ray & ray, std::vector<Object*>& objectList, float & 
 	//Sort the possible intersections by the closest ray parameter
 	possibleIntersectionList.sort();
 
-	nearestHitParameter = MathFunctions::T_INFINITY;
 	while (!possibleIntersectionList.empty())
 	{
+		nearestHitParameter = MathFunctions::T_INFINITY;
 		//Need to pass a temporary intersection data struct so that intersection data does not get overwritten when an intersection is not the closest intersection point
 		IntersectionData tempData;
 		if (possibleIntersectionList.front().objectHit->intersect(ray, nearestHitParameter, tempData) && !ARE_FLOATS_EQUAL(nearestHitParameter, 0.0f) && nearestHitParameter < upperBound)

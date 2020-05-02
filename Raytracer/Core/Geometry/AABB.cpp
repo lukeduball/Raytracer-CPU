@@ -81,6 +81,12 @@ bool AABB::intersect(const Ray & ray, float & t)
 		t = tmax;
 	}
 
+	//Intersection is behind the ray 
+	if (t < 0.0f)
+	{
+		return false;
+	}
+
 	return true;
 }
 

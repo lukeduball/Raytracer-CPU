@@ -9,6 +9,7 @@
 #include "../DataStructures/Octree.h"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/norm.hpp>
 
 Entity::Entity(glm::vec3 pos, float s, Model * m, Material * material) : Object(pos, material), scale(s), model(m), pitchRotation(0.0f), yawRotation(0.0f), rollRotation(0.0f)
 {
@@ -145,7 +146,20 @@ float Entity::convertLocalParameterToWorldParameter(const Ray & localRay, float 
 {
 	glm::vec3 localIntersection = localRay.getOrigin() + localRay.getDirectionVector() * localParameter;
 	glm::vec3 globalIntersection = this->localToWorldMatrix * glm::vec4(localIntersection, 1.0f);
-	return (globalIntersection - worldRay.getOrigin()).x / worldRay.getDirectionVector().x;
+	if (!ARE_FLOATS_EQUAL(worldRay.getDirectionVector().x, 0.0f))
+	{
+		return (globalIntersection - worldRay.getOrigin()).x / (worldRay.getDirectionVector()).x;
+	}
+
+	if (!ARE_FLOATS_EQUAL(worldRay.getDirectionVector().y, 0.0f))
+	{
+		return (globalIntersection - worldRay.getOrigin()).y / (worldRay.getDirectionVector()).y;
+	}
+
+	if (!ARE_FLOATS_EQUAL(worldRay.getDirectionVector().z, 0.0f))
+	{
+		return (globalIntersection - worldRay.getOrigin()).z / (worldRay.getDirectionVector()).z;
+	}
 }
 
 glm::vec3 Entity::getSmoothNormal(const glm::vec3 & intersectionPoint, const Face * face, const uint32_t & meshIndex)

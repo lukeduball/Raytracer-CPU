@@ -85,7 +85,6 @@ public:
 		if (root)
 		{
 			deleteChildren(root);
-			delete root;
 		}
 	}
 
